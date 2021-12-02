@@ -72,8 +72,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\_external\stb-master;..\_external\freeglut\include;..\_external\glew-2.1.0\include;..\_external\glfw-3.3.4.bin.WIN32\include\GLFW;..\_external\glm;$(IncludePath)</IncludePath>
-    <LibraryPath>..\_external\glfw-3.3.4.bin.WIN32\lib-vc2019;..\_external\freeglut\lib;..\_external\glew-2.1.0\lib\Release\Win32;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\_externals\stb-master;..\_externals\freeglut\include;..\_externals\glew-2.1.0\include;..\_externals\glfw-3.3.4.bin.WIN32\include\GLFW;..\_externals\glm;$(IncludePath)</IncludePath>
+    <LibraryPath>..\_externals\glfw-3.3.4.bin.WIN32\lib-vc2019;..\_externals\freeglut\lib;..\_externals\glew-2.1.0\lib\Release\Win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
