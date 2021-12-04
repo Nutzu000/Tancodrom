@@ -1,1 +1,6 @@
-﻿  Tankodrome.vcxproj -> D:\Grafica3D\Tankodrome\Tankodrome\Debug\Tankodrome.exe
+﻿  Tankodrome.cpp
+C:\Users\gliza\Desktop\Tankodrome\Tankodrome\Tankodrome\Tankodrome.cpp(524,13): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome\Tankodrome\Tankodrome\Tankodrome.cpp(525,13): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome\Tankodrome\Tankodrome\Tankodrome.cpp(671,22): warning C4305: '+=': truncation from 'double' to 'float'
+C:\Users\gliza\Desktop\Tankodrome\Tankodrome\Tankodrome\Tankodrome.cpp(677,22): warning C4305: '-=': truncation from 'double' to 'float'
+  Tankodrome.vcxproj -> C:\Users\gliza\Desktop\Tankodrome\Tankodrome\Debug\Tankodrome.exe
