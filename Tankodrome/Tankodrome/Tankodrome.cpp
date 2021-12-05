@@ -273,58 +273,16 @@ const GLchar* FragmentShader =
 
 void CreateVBO()
 {
-	//aici era patratul initial
-	//float vertices[] = {
-	//	 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,
-	//	 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
-	//	 -0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
-	//	 -0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 0.0f,   0.0f, 1.0f
-	//};
-	//unsigned int indices[] = {
-	//   0, 1, 3,
-	//   1, 2, 3
-	//};
-
-	//aici e piramida
-	//float vertices[] = {
-	//	 -0.8f, -0.8f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,
-	//	 0.0f, -0.8f, 0.8f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
-	//	 0.8f, -0.8f, 0.0f,  0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
-	//	 0.0f,  0.8f, 0.0f,  1.0f, 1.0f, 0.0f,   0.0f, 1.0f
-	//};
-	//unsigned int indices[] = {
-	//   0,1,3,
-	//	1,2,3,
-	//	2,0,3,
-	//	0,1,2,
-	//};
-
-	//aici e cubul
 	float vertices[] = {
-			 0.0f, 0.0f, 1.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f, //jos stanga
-			 1.0f, 0.0f, 1.0f,   1.0f, 1.0f,1.0f,   0.0f, 1.0f, // jos dreapta
-			 1.0f, 1.0f, 1.0f,  1.0f, 1.0f, 1.0f,   1.0f, 1.0f,//sus dreapta
-			 0.0f, 1.0f, 1.0f,  1.0f, 1.0f, 1.0f,   1.0f, 0.0f,//sus stanga
-			 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,   1.0f, 1.0f,//jost dreapta
-			1.0f, 0.0f, 0.0f,  1.0f, 0.0f, 0.0f,   1.0f, 0.0f,//jos stanga
-			1.0f, 1.0f, 0.0f,  0.0f, 1.0f, 0.0f,   0.0f, 0.0f,//sus stanga
-			0.0f, 1.0f, 0.0f,  0.0f, 0.0f, 1.0f,   0.0f, 1.0f,//sus dreapta
+				 0.0f, 0.0f, 1.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f, //jos stanga
+				 1.0f, 0.0f, 1.0f,   1.0f, 1.0f, 1.0f,   1.0f, 0.0f, // jos dreapta
+				 0.0f, 0.0f, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 1.0f, //sus stanga
+				 1.0f, 0.0f, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f, //sus dreapta
 	};
 	unsigned int indices[] = {
-	   0,1,2,
-	   0,2,3,
-	   1,5,6,
-	   1,6,2,
-	   5,4,7,
-	   5,7,6,
-	   4,0,3,
-	   4,3,7,
-	   0,5,1,
-	   0,4,5,
-	   3,2,6,
-	   3,6,7
+	 0,1,2,
+	 2,1,3
 	};
-
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
@@ -474,7 +432,7 @@ void Initialize(const std::string& strExePath)
 	CreateTextures(strExePath);
 
 	// Create camera
-	pCamera = new Camera(SCR_WIDTH, SCR_HEIGHT, glm::vec3(0.5, 0.5, 10));
+	pCamera = new Camera(SCR_WIDTH, SCR_HEIGHT, glm::vec3(0.5, 4.0, 10));
 }
 
 void RenderCube()
@@ -490,15 +448,15 @@ void RenderCube()
 void RenderFunction()
 {
 	glm::vec3 cubePositions[] = {
-	   glm::vec3(0.0f,  0.0f,   0.0f),
-	   /*glm::vec3(-5.0f,  5.0f,  5.0f),
-	   glm::vec3(-5.0f, -5.0f,  5.0f),
-	   glm::vec3(5.0f, -5.0f,  5.0f),
-	   glm::vec3(5.0f,  5.0f,  5.0f),
-	   glm::vec3(-5.0f,  5.0f, -5.0f),
-	   glm::vec3(-5.0f, -5.0f, -5.0f),
-	   glm::vec3(5.0f, -5.0f, -5.0f),
-	   glm::vec3(5.0f,  5.0f, -5.0f),*/
+	   glm::vec3(0.0f,  0.0f,   0.0f),//centru
+	   glm::vec3(1.0f,  0.0f,   0.0f),//dreapta
+	   glm::vec3(-1.0f,  0.0f,   0.0f),//stanga
+	   glm::vec3(0.0f,  0.0f,   -1.0f),//sus
+	   glm::vec3(0.0f,  0.0f,   1.0f),//jos
+	   glm::vec3(-1.0f,  0.0f,   -1.0f),//sus stanga
+	   glm::vec3(1.0f,  0.0f,   -1.0f),//sus dreapta
+	   glm::vec3(1.0f,  0.0f,   1.0f),//jos dreapta
+	   glm::vec3(-1.0f,  0.0f,   1.0f),//jos stanga
 	};
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -515,16 +473,16 @@ void RenderFunction()
 	glUniformMatrix4fv(ProjMatrixLocation, 1, GL_FALSE, glm::value_ptr(projection));
 
 	//uncomment this to move camera with mouse
-	//glm::mat4 view = pCamera->GetViewMatrix();
-	//glUniformMatrix4fv(ViewMatrixLocation, 1, GL_FALSE, glm::value_ptr(view));
+	glm::mat4 view = pCamera->GetViewMatrix();
+	glUniformMatrix4fv(ViewMatrixLocation, 1, GL_FALSE, glm::value_ptr(view));
 
 	//comment this to move camera with mouse
-	glm::mat4 view;
+	/*glm::mat4 view;
 	float radius = 10.0f;
 	float camX = sin(glfwGetTime()) * radius;
 	float camZ = cos(glfwGetTime()) * radius;
 	view = glm::lookAt(glm::vec3(camX, 0.0f, camZ), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	glUniformMatrix4fv(ViewMatrixLocation, 1, GL_FALSE, glm::value_ptr(view));
+	glUniformMatrix4fv(ViewMatrixLocation, 1, GL_FALSE, glm::value_ptr(view));*/
 	//pana aici
 
 	glBindVertexArray(VAO);
