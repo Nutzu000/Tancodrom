@@ -1,7 +1,7 @@
 #include <stdlib.h> // necesare pentru citirea shader-elor
 #include <stdio.h>
 #include <math.h> 
-
+#include "Shader.h"
 #include <GL/glew.h>
 
 #include <GLM.hpp>
@@ -22,7 +22,7 @@
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
-
+GLuint cubemapTexture;
 enum ECameraMovementType
 {
 	UNKNOWN,
@@ -231,6 +231,8 @@ unsigned int VertexShaderId, FragmentShaderId, ProgramId;
 GLuint ProjMatrixLocation, ViewMatrixLocation, WorldMatrixLocation;
 unsigned int texture1Location, texture2Location;
 
+//initializari skybox
+unsigned int skyboxVAO, skyboxVBO, skyboxEBO;
 
 Camera* pCamera = nullptr;
 
@@ -270,16 +272,105 @@ const GLchar* FragmentShader =
    "}\n"
 };
 
+void CreateSkyboxVBO(const std::string& strExePath) {
 
+	float skybox[] = {
+
+	-1.0f, -1.0f,  1.0f,
+	 1.0f, -1.0f,  1.0f,
+	 1.0f, -1.0f, -1.0f,
+	-1.0f, -1.0f, -1.0f,
+	-1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f, -1.0f,
+	-1.0f,  1.0f, -1.0f
+	};
+	unsigned int skyboxIndices[] =
+	{
+		1, 2, 6,
+		6, 5, 1,
+		0, 4, 7,
+		7, 3, 0,
+		4, 5, 6,
+		6, 7, 4,
+		0, 3, 2,
+		2, 1, 0,
+		0, 1, 5,
+		5, 4, 0,
+		3, 7, 6,
+		6, 2, 3
+	};
+	glGenVertexArrays(1, &skyboxVAO);
+	glGenBuffers(1, &skyboxVBO);
+	glGenBuffers(1, &skyboxEBO);
+	glBindVertexArray(skyboxVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skybox), &skybox, GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, skyboxEBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(skyboxIndices), &skyboxIndices, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	//load and create skybox texture
+	std::string skyboxPaths[6] = {
+		strExePath + "\\skyboxRight.jpg",
+		strExePath + "\\skyboxLeft.png",
+		strExePath + "\\skyboxTop.png",
+		strExePath + "\\skyboxBottom.png",
+		strExePath + "\\skyboxFront.png",
+		strExePath + "\\skyboxBack.png"
+	};
+	glGenTextures(1, &cubemapTexture);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	// These are very important to prevent seams
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	// This might help with seams on some systems
+	//glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
+	// Cycles through all the textures and attaches them to the cubemap object
+	for (unsigned int i = 0; i < 6; i++)
+	{
+		int width, height, nrChannels;
+		unsigned char* data = stbi_load(skyboxPaths[i].c_str(), &width, &height, &nrChannels, 0);
+		if (data)
+		{
+			stbi_set_flip_vertically_on_load(false);
+			glTexImage2D
+			(
+				GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+				0,
+				GL_RGB,
+				width,
+				height,
+				0,
+				GL_RGB,
+				GL_UNSIGNED_BYTE,
+				data
+			);
+			stbi_image_free(data);
+		}
+		else
+		{
+			std::cout << "Failed to load texture: " << skyboxPaths[i] << std::endl;
+			stbi_image_free(data);
+		}
+	}
+}
 void CreateVBO()
 {
-	float vertices[] = {
+	float square[] = {
 				 0.0f, 0.0f, 1.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f, //jos stanga
 				 1.0f, 0.0f, 1.0f,   1.0f, 1.0f, 1.0f,   1.0f, 0.0f, // jos dreapta
 				 0.0f, 0.0f, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 1.0f, //sus stanga
 				 1.0f, 0.0f, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f, //sus dreapta
 	};
-	unsigned int indices[] = {
+	unsigned int squareIndices[] = {
 	 0,1,2,
 	 2,1,3
 	};
@@ -290,10 +381,10 @@ void CreateVBO()
 	glBindVertexArray(VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(square), square, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(squareIndices), squareIndices, GL_STATIC_DRAW);
 
 	// position attribute
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
@@ -310,6 +401,9 @@ void DestroyVBO()
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &EBO);
+	glDeleteVertexArrays(1, &skyboxVAO);
+	glDeleteBuffers(1, &skyboxVBO);
+	glDeleteBuffers(1, &skyboxEBO);
 }
 void CreateShaders()
 {
@@ -419,14 +513,14 @@ void CreateTextures(const std::string& strExePath)
 void Initialize(const std::string& strExePath)
 {
 	glClearColor(0.5f, 0.8f, 0.9f, 1.0f); // culoarea de fond a ecranului
-	//glEnable(GL_CULL_FACE);
+
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_COLOR_MATERIAL);
 	glDisable(GL_LIGHTING);
 
 	//glFrontFace(GL_CCW);
 	//glCullFace(GL_BACK);
-
+	CreateSkyboxVBO(strExePath);
 	CreateVBO();
 	CreateShaders();
 	CreateTextures(strExePath);
@@ -501,9 +595,34 @@ void Cleanup()
 	DestroyShaders();
 	DestroyVBO();
 
+
 	delete pCamera;
 }
+void drawSkybox(Shader skyboxShader) {
+	// Since the cubemap will always have a depth of 1.0, we need that equal sign so it doesn't get discarded
+	glDepthFunc(GL_LEQUAL);
 
+	skyboxShader.Activate();
+	glm::mat4 view = glm::mat4(1.0f);
+	glm::mat4 projection = glm::mat4(1.0f);
+	// We make the mat4 into a mat3 and then a mat4 again in order to get rid of the last row and column
+	// The last row and column affect the translation of the skybox (which we don't want to affect)
+	view = glm::mat4(glm::mat3(pCamera->GetViewMatrix()));
+	projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / SCR_HEIGHT, 0.1f, 100.0f);
+	glUniformMatrix4fv(glGetUniformLocation(skyboxShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+	glUniformMatrix4fv(glGetUniformLocation(skyboxShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+	// Draws the cubemap as the last object so we can save a bit of performance by discarding all fragments
+	// where an object is present (a depth of 1.0f will always fail against any object's depth value)
+	glBindVertexArray(skyboxVAO);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+
+	// Switch back to the normal depth function
+	glDepthFunc(GL_LESS);
+}
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -516,6 +635,7 @@ double lastFrame = 0.0f;
 
 int main(int argc, char** argv)
 {
+
 	std::string strFullExeFileName = argv[0];
 	std::string strExePath;
 	const size_t last_slash_idx = strFullExeFileName.rfind('\\');
@@ -529,8 +649,9 @@ int main(int argc, char** argv)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+
 	// glfw window creation
-	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Lab 6", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Tankodrome", NULL, NULL);
 	if (window == NULL) {
 		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
@@ -548,7 +669,9 @@ int main(int argc, char** argv)
 	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	glewInit();
-
+	Shader skyboxShader("Skybox.vs", "Skybox.fs");
+	skyboxShader.Activate();
+	glUniform1i(glGetUniformLocation(skyboxShader.ID, "skybox"), 0);
 	Initialize(strExePath);
 
 	// render loop
@@ -557,18 +680,19 @@ int main(int argc, char** argv)
 		double currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
+		// render
+		RenderFunction();
 
+		drawSkybox(skyboxShader);
 		// input
 		processInput(window);
 
-		// render
-		RenderFunction();
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-
+	skyboxShader.Delete();
 	Cleanup();
 
 	// glfw: terminate, clearing all previously allocated GLFW resources
