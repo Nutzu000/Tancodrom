@@ -1,4 +1,2 @@
 ﻿  Tankodrome.cpp
-C:\Users\gliza\Desktop\Tankodrome\Tankodrome\Tankodrome\Tankodrome.cpp(753,22): warning C4305: '+=': truncation from 'double' to 'float'
-C:\Users\gliza\Desktop\Tankodrome\Tankodrome\Tankodrome\Tankodrome.cpp(759,22): warning C4305: '-=': truncation from 'double' to 'float'
   Tankodrome.vcxproj -> C:\Users\gliza\Desktop\Tankodrome\Tankodrome\Debug\Tankodrome.exe

@@ -666,7 +666,7 @@ int main(int argc, char** argv)
 
 
 	// tell GLFW to capture our mouse
-	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	glewInit();
 	Shader skyboxShader("Skybox.vs", "Skybox.fs");
@@ -706,19 +706,19 @@ void processInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 
-	if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)//W for front
 		pCamera->ProcessKeyboard(FORWARD, (float)deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)//S for back
 		pCamera->ProcessKeyboard(BACKWARD, (float)deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)//A for left
 		pCamera->ProcessKeyboard(LEFT, (float)deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)//D for right
 		pCamera->ProcessKeyboard(RIGHT, (float)deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)//Q for uo
 		pCamera->ProcessKeyboard(UP, (float)deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)//E for down
 		pCamera->ProcessKeyboard(DOWN, (float)deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
+	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {//reset la pozitia initiala
 		int width, height;
 		glfwGetWindowSize(window, &width, &height);
 		pCamera->Reset(width, height);
@@ -747,7 +747,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yOffset)
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	static float s_fMixValue = 0.5;
+	/*static float s_fMixValue = 0.5;
 	if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
 		if (s_fMixValue < 1.0) {
 			s_fMixValue += 0.1;
@@ -759,6 +759,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			s_fMixValue -= 0.1;
 			glUniform1f(glGetUniformLocation(ProgramId, "mixValue"), s_fMixValue);
 		}
-	}
+	}*/
 
 }
