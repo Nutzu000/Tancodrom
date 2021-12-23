@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <math.h> 
 #include "Shader.h"
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "tinyObjLoader.h"
 #include <GL/glew.h>
 
 #include <GLM.hpp>
@@ -23,6 +25,7 @@
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 GLuint cubemapTexture;
+
 enum ECameraMovementType
 {
 	UNKNOWN,
@@ -229,7 +232,11 @@ protected:
 GLuint VAO, VBO, EBO;
 unsigned int VertexShaderId, FragmentShaderId, ProgramId;
 GLuint ProjMatrixLocation, ViewMatrixLocation, WorldMatrixLocation;
-unsigned int texture1Location, texture2Location;
+unsigned int texture1Location, texture2Location, texture3Location;
+
+std::vector<GLuint> ShapesVAO, ShapesVBO;
+std::vector<size_t> ShapesVertexCounts;
+unsigned int ShapeProgramId;
 
 //initializari skybox
 unsigned int skyboxVAO, skyboxVBO, skyboxEBO;
@@ -509,6 +516,27 @@ void CreateTextures(const std::string& strExePath)
 		std::cout << "Failed to load texture" << std::endl;
 	}
 	stbi_image_free(data);
+	// texture 3
+	// ---------
+	glGenTextures(1, &texture3Location);
+	glBindTexture(GL_TEXTURE_2D, texture3Location);
+	// set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// load image, create texture and generate mipmaps
+	data = stbi_load((strExePath + "\\TexturaTank.png").c_str(), &width, &height, &nrChannels, 0);
+	if (data) {
+		// note that the awesomeface.png has transparency and thus an alpha channel, so make sure to tell OpenGL the data type is of GL_RGBA
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else {
+		std::cout << "Failed to load texture" << std::endl;
+	}
+	stbi_image_free(data);
 }
 void Initialize(const std::string& strExePath)
 {
@@ -524,6 +552,132 @@ void Initialize(const std::string& strExePath)
 	CreateVBO();
 	CreateShaders();
 	CreateTextures(strExePath);
+	std::string inputfile = strExePath + "\\TankCuTexturi.obj";
+	tinyobj::ObjReaderConfig reader_config;
+	reader_config.mtl_search_path = strExePath + "\\"; // Path to material files
+	reader_config.triangulate = true;
+	reader_config.vertex_color = true;
+	tinyobj::ObjReader reader;
+
+	if (!reader.ParseFromFile(inputfile, reader_config)) {
+		if (!reader.Error().empty()) {
+			std::cerr << "TinyObjReader: " << reader.Error();
+		}
+		exit(1);
+	}
+
+	if (!reader.Warning().empty()) {
+		std::cout << "TinyObjReader: " << reader.Warning();
+	}
+	auto& attrib = reader.GetAttrib();
+	auto& shapes = reader.GetShapes();
+	auto& materials = reader.GetMaterials();
+
+	std::vector <std::vector<float>> shapeVertices{};
+	printf("# of vertices  = %d\n", (int)(attrib.vertices.size()) / 3);
+	printf("# of normals   = %d\n", (int)(attrib.normals.size()) / 3);
+	printf("# of texcoords = %d\n", (int)(attrib.texcoords.size()) / 2);
+	printf("# of vertex colors = %d\n", (int)(attrib.colors.size()) / 3);
+	printf("# of materials = %d\n", (int)materials.size());
+	printf("# of shapes    = %d\n", (int)shapes.size());
+
+	// Loop over shapes
+	for (size_t s = 0; s < shapes.size(); s++) {
+		// Loop over faces(polygon)
+		size_t index_offset = 0;
+
+		shapeVertices.emplace_back();
+
+		for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++) {
+			size_t fv = size_t(shapes[s].mesh.num_face_vertices[f]);
+			std::vector<float>& currentShapeBuffer = shapeVertices.back();
+
+			// per-face material
+			auto& material = materials[shapes[s].mesh.material_ids[f]];
+			tinyobj::real_t red = material.diffuse[0];
+			tinyobj::real_t green = material.diffuse[1];
+			tinyobj::real_t blue = material.diffuse[2];
+
+			// Loop over vertices in the face.
+			for (size_t v = 0; v < fv; v++) {
+				// access to vertex
+				tinyobj::index_t idx = shapes[s].mesh.indices[index_offset + v];
+				tinyobj::real_t vx = attrib.vertices[3 * size_t(idx.vertex_index) + 0];
+				tinyobj::real_t vy = attrib.vertices[3 * size_t(idx.vertex_index) + 1];
+				tinyobj::real_t vz = attrib.vertices[3 * size_t(idx.vertex_index) + 2];
+
+				// Check if `normal_index` is zero or positive. negative = no normal data
+				tinyobj::real_t nx = 0;
+				tinyobj::real_t ny = 0;
+				tinyobj::real_t nz = 0;
+
+				if (idx.normal_index >= 0) {
+					nx = attrib.normals[3 * size_t(idx.normal_index) + 0];
+					ny = attrib.normals[3 * size_t(idx.normal_index) + 1];
+					nz = attrib.normals[3 * size_t(idx.normal_index) + 2];
+				}
+
+				// Check if `texcoord_index` is zero or positive. negative = no texcoord data
+				tinyobj::real_t tx = 0;
+				tinyobj::real_t ty = 0;
+
+				if (idx.texcoord_index >= 0) {
+					tx = attrib.texcoords[2 * size_t(idx.texcoord_index) + 0];
+					ty = attrib.texcoords[2 * size_t(idx.texcoord_index) + 1];
+				}
+
+				// Optional: vertex colors
+				//tinyobj::real_t red = attrib.colors[3 * size_t(idx.vertex_index) + 0];
+				//tinyobj::real_t green = attrib.colors[3 * size_t(idx.vertex_index) + 1];
+				//tinyobj::real_t blue = attrib.colors[3 * size_t(idx.vertex_index) + 2];
+
+				currentShapeBuffer.insert(currentShapeBuffer.end(), {
+					vx, vy, vz, nx, ny, nz, tx, ty, red, green, blue });
+			}
+			index_offset += fv;
+
+
+		}
+	}
+
+	ShapesVAO.resize(shapes.size());
+	ShapesVBO.resize(shapes.size());
+	ShapesVertexCounts.resize(shapes.size());
+
+	for (size_t s = 0; s < shapes.size(); s++) {
+		GLuint& vao = ShapesVAO[s];
+		GLuint& vbo = ShapesVBO[s];
+
+		std::vector<float>& buffer = shapeVertices[s];
+		glGenVertexArrays(1, &vao);
+		glGenBuffers(1, &vbo);
+		glBindVertexArray(vao);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(float), buffer.data(), GL_STATIC_DRAW);
+
+		float attribSize = 11 * sizeof(float);
+
+		ShapesVertexCounts[s] = buffer.size() / 11;
+
+		// position attribute
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, attribSize, (void*)0);
+		glEnableVertexAttribArray(0);
+
+		// color attribute
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, attribSize, (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+
+		// texture coord attribute
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, attribSize, (void*)(6 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+
+		// colors attribute
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, attribSize, (void*)(8 * sizeof(float)));
+		glEnableVertexAttribArray(3);
+
+	}
+
 
 	// Create camera
 	pCamera = new Camera(SCR_WIDTH, SCR_HEIGHT, glm::vec3(0.5, 4.0, 10));
@@ -539,6 +693,42 @@ void RenderCube()
 	glDrawElements(GL_TRIANGLES, indexArraySize / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
 }
 
+void RenderCornell() {
+	glUseProgram(ShapeProgramId);
+
+	unsigned int projMatrixLocation = glGetUniformLocation(ShapeProgramId, "ProjMatrix");
+	unsigned int viewMatrixLocation = glGetUniformLocation(ShapeProgramId, "ViewMatrix");
+	unsigned int worldMatrixLocation = glGetUniformLocation(ShapeProgramId, "WorldMatrix");
+
+	glm::mat4 projection = pCamera->GetProjectionMatrix();
+	glUniformMatrix4fv(projMatrixLocation, 1, GL_FALSE, glm::value_ptr(projection));
+
+	glm::mat4 view = pCamera->GetViewMatrix();
+	glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(view));
+
+	//outdated st
+	//glm::mat4 worldTransf = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(0, 1, 0)), glm::vec3(0.01, 0.01, 0.01));
+	//glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, glm::value_ptr(worldTransf));
+
+	//drawing and scaling the object in the meant place
+	glm::mat4 position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(0.0f, 0.0f, 0.0f)), glm::vec3(0.01f, 0.01f, 0.01f));
+	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, texture3Location);
+
+	for (size_t s = 0; s < ShapesVAO.size(); s++) {
+		GLuint& vao = ShapesVAO[s];
+		GLuint& vbo = ShapesVBO[s];
+
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+
+
+		glDrawArrays(GL_TRIANGLES, 0, ShapesVertexCounts[s]);
+	}
+}
 void RenderFunction()
 {
 	glm::vec3 cubePositions[] = {
@@ -588,6 +778,7 @@ void RenderFunction()
 
 		RenderCube();
 	}
+	RenderCornell();
 }
 
 void Cleanup()
@@ -669,9 +860,16 @@ int main(int argc, char** argv)
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	glewInit();
+
 	Shader skyboxShader("Skybox.vs", "Skybox.fs");
 	skyboxShader.Activate();
 	glUniform1i(glGetUniformLocation(skyboxShader.ID, "skybox"), 0);
+
+	Shader shapeShader("Model.vs", "Model.fs");
+	shapeShader.Activate();
+	ShapeProgramId = shapeShader.ID;
+	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 2);
+
 	Initialize(strExePath);
 
 	// render loop
@@ -714,7 +912,7 @@ void processInput(GLFWwindow* window)
 		pCamera->ProcessKeyboard(LEFT, (float)deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)//D for right
 		pCamera->ProcessKeyboard(RIGHT, (float)deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)//Q for uo
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)//Q for up
 		pCamera->ProcessKeyboard(UP, (float)deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)//E for down
 		pCamera->ProcessKeyboard(DOWN, (float)deltaTime);

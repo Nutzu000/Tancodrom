@@ -25,9 +25,14 @@
   <ItemGroup>
     <None Include="Skybox.vs" />
     <None Include="Skybox.fs" />
+    <None Include="Model.fs" />
+    <None Include="Model.vs" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tinyObjLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
