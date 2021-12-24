@@ -1,10 +1,6 @@
-﻿  Shader.cpp
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Shader.cpp(11,27): warning C4244: 'argument': conversion from 'std::streamoff' to 'const unsigned int', possible loss of data
-  Tankodrome.cpp
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(664,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(668,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(672,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(676,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-  Generating Code...
-  LINK : C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Debug\Tankodrome.exe not found or not built by the last incremental link; performing full link
+﻿  Tankodrome.cpp
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(706,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(710,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(714,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(718,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
   Tankodrome.vcxproj -> C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Debug\Tankodrome.exe

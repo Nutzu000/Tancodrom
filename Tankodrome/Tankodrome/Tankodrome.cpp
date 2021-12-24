@@ -25,7 +25,7 @@
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 GLuint cubemapTexture;
-
+float i = 0;
 enum ECameraMovementType
 {
 	UNKNOWN,
@@ -232,7 +232,7 @@ protected:
 GLuint VAO, VBO, EBO;
 unsigned int VertexShaderId, FragmentShaderId, ProgramId;
 GLuint ProjMatrixLocation, ViewMatrixLocation, WorldMatrixLocation;
-unsigned int texture1Location, texture2Location, texture3Location;
+unsigned int texture1Location, texture2Location, texture3Location, texture4Location, texture5Location;
 
 std::vector<GLuint> ShapesVAO, ShapesVBO;
 std::vector<size_t> ShapesVertexCounts;
@@ -537,6 +537,48 @@ void CreateTextures(const std::string& strExePath)
 		std::cout << "Failed to load texture" << std::endl;
 	}
 	stbi_image_free(data);
+	// texture 4
+	// ---------
+	glGenTextures(1, &texture4Location);
+	glBindTexture(GL_TEXTURE_2D, texture4Location);
+	// set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// load image, create texture and generate mipmaps
+	data = stbi_load((strExePath + "\\TexturaTank2.jpg").c_str(), &width, &height, &nrChannels, 0);
+	if (data) {
+		// note that the awesomeface.png has transparency and thus an alpha channel, so make sure to tell OpenGL the data type is of GL_RGBA
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else {
+		std::cout << "Failed to load texture" << std::endl;
+	}
+	stbi_image_free(data);
+	// texture 4
+	// ---------
+	glGenTextures(1, &texture5Location);
+	glBindTexture(GL_TEXTURE_2D, texture5Location);
+	// set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// load image, create texture and generate mipmaps
+	data = stbi_load((strExePath + "\\TexturaTank3.jpg").c_str(), &width, &height, &nrChannels, 0);
+	if (data) {
+		// note that the awesomeface.png has transparency and thus an alpha channel, so make sure to tell OpenGL the data type is of GL_RGBA
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else {
+		std::cout << "Failed to load texture" << std::endl;
+	}
+	stbi_image_free(data);
 }
 void Initialize(const std::string& strExePath)
 {
@@ -693,7 +735,7 @@ void RenderCube()
 	glDrawElements(GL_TRIANGLES, indexArraySize / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
 }
 
-void RenderCornell() {
+void RenderTank1() {
 	glUseProgram(ShapeProgramId);
 
 	unsigned int projMatrixLocation = glGetUniformLocation(ShapeProgramId, "ProjMatrix");
@@ -711,7 +753,8 @@ void RenderCornell() {
 	//glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, glm::value_ptr(worldTransf));
 
 	//drawing and scaling the object in the meant place
-	glm::mat4 position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(0.0f, 0.0f, 0.0f)), glm::vec3(0.01f, 0.01f, 0.01f));
+	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 2);
+	glm::mat4 position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(0.0f+i, 0.08f, 0.0f)), glm::vec3(0.01f, 0.01f, 0.01f));
 	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
 
 	glActiveTexture(GL_TEXTURE2);
@@ -724,24 +767,58 @@ void RenderCornell() {
 		glBindVertexArray(vao);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
+		glDrawArrays(GL_TRIANGLES, 0, ShapesVertexCounts[s]);
+	}
 
+	//drawing the same obj again
+	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 3);
+	position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(0.0f, 0.08f, 2.0f)), glm::vec3(0.01f, 0.01f, 0.01f));
+	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
+
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, texture4Location);
+
+	for (size_t s = 0; s < ShapesVAO.size(); s++) {
+		GLuint& vao = ShapesVAO[s];
+		GLuint& vbo = ShapesVBO[s];
+
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+		glDrawArrays(GL_TRIANGLES, 0, ShapesVertexCounts[s]);
+	}
+
+	//and again
+	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 4);
+	position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(0.0f, 0.08f, 4.0f)), glm::vec3(0.01f, 0.01f, 0.01f));
+	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
+
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, texture5Location);
+
+	for (size_t s = 0; s < ShapesVAO.size(); s++) {
+		GLuint& vao = ShapesVAO[s];
+		GLuint& vbo = ShapesVBO[s];
+
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
 		glDrawArrays(GL_TRIANGLES, 0, ShapesVertexCounts[s]);
 	}
 }
 void RenderFunction()
 {
-	glm::vec3 cubePositions[] = {
-	   glm::vec3(0.0f,  0.0f,   0.0f),//centru
-	   glm::vec3(1.0f,  0.0f,   0.0f),//dreapta
-	   glm::vec3(-1.0f,  0.0f,   0.0f),//stanga
-	   glm::vec3(0.0f,  0.0f,   -1.0f),//sus
-	   glm::vec3(0.0f,  0.0f,   1.0f),//jos
-	   glm::vec3(-1.0f,  0.0f,   -1.0f),//sus stanga
-	   glm::vec3(1.0f,  0.0f,   -1.0f),//sus dreapta
-	   glm::vec3(1.0f,  0.0f,   1.0f),//jos dreapta
-	   glm::vec3(-1.0f,  0.0f,   1.0f),//jos stanga
-	};
+	//glm::vec3 cubePositions[] = {
+	//   glm::vec3(0.0f,  0.0f,   0.0f),//centru
+	//   glm::vec3(1.0f,  0.0f,   0.0f),//dreapta
+	//   glm::vec3(-1.0f,  0.0f,   0.0f),//stanga
+	//   glm::vec3(0.0f,  0.0f,   -1.0f),//sus
+	//   glm::vec3(0.0f,  0.0f,   1.0f),//jos
+	//   glm::vec3(-1.0f,  0.0f,   -1.0f),//sus stanga
+	//   glm::vec3(1.0f,  0.0f,   -1.0f),//sus dreapta
+	//   glm::vec3(1.0f,  0.0f,   1.0f),//jos dreapta
+	//   glm::vec3(-1.0f,  0.0f,   1.0f),//jos stanga
+	//};
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -771,14 +848,24 @@ void RenderFunction()
 
 	glBindVertexArray(VAO);
 
-	for (unsigned int i = 0; i < sizeof(cubePositions) / sizeof(cubePositions[0]); i++) {
-		// calculate the model matrix for each object and pass it to shader before drawing
+	/*for (unsigned int i = 0; i < sizeof(cubePositions) / sizeof(cubePositions[0]); i++) {
+		//calculate the model matrix for each object and pass it to shader before drawing
 		glm::mat4 worldTransf = glm::translate(glm::mat4(1.0), cubePositions[i]);
 		glUniformMatrix4fv(WorldMatrixLocation, 1, GL_FALSE, glm::value_ptr(worldTransf));
 
 		RenderCube();
+	}*/
+
+	//platform size
+	int size = 20;
+	for (int x = -size; x <= size; x++) {
+		for (int z = -size; z <= size; z++) {
+			glm::mat4 worldTransf = glm::translate(glm::mat4(1.0), glm::vec3(x, 0.0f, z));
+			glUniformMatrix4fv(WorldMatrixLocation, 1, GL_FALSE, glm::value_ptr(worldTransf));
+			RenderCube();
+		}
 	}
-	RenderCornell();
+	RenderTank1();
 }
 
 void Cleanup()
@@ -874,6 +961,7 @@ int main(int argc, char** argv)
 
 	// render loop
 	while (!glfwWindowShouldClose(window)) {
+		//i += 0.01; //movement
 		// per-frame time logic
 		double currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
