@@ -1,6 +1,14 @@
 ﻿  Tankodrome.cpp
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(706,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(710,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(714,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(718,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(690,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(694,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(698,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(702,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(814,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(818,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(822,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(826,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(938,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(942,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(946,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(950,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
   Tankodrome.vcxproj -> C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Debug\Tankodrome.exe

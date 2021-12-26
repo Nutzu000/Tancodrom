@@ -234,8 +234,8 @@ unsigned int VertexShaderId, FragmentShaderId, ProgramId;
 GLuint ProjMatrixLocation, ViewMatrixLocation, WorldMatrixLocation;
 unsigned int texture1Location, texture2Location, texture3Location, texture4Location, texture5Location;
 
-std::vector<GLuint> ShapesVAO, ShapesVBO;
-std::vector<size_t> ShapesVertexCounts;
+std::vector<GLuint> Tank1VAO, Tank1VBO, Tank2VAO, Tank2VBO, Tank3VAO, Tank3VBO;
+std::vector<size_t> Tank1VertexCounts, Tank2VertexCounts, Tank3VertexCounts;
 unsigned int ShapeProgramId;
 
 //initializari skybox
@@ -580,21 +580,8 @@ void CreateTextures(const std::string& strExePath)
 	}
 	stbi_image_free(data);
 }
-void Initialize(const std::string& strExePath)
-{
-	glClearColor(0.5f, 0.8f, 0.9f, 1.0f); // culoarea de fond a ecranului
-
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_COLOR_MATERIAL);
-	glDisable(GL_LIGHTING);
-
-	//glFrontFace(GL_CCW);
-	//glCullFace(GL_BACK);
-	CreateSkyboxVBO(strExePath);
-	CreateVBO();
-	CreateShaders();
-	CreateTextures(strExePath);
-	std::string inputfile = strExePath + "\\TankCuTexturi.obj";
+void importTank1(const std::string& strExePath) {
+	std::string inputfile = strExePath + "\\Tank1.obj";
 	tinyobj::ObjReaderConfig reader_config;
 	reader_config.mtl_search_path = strExePath + "\\"; // Path to material files
 	reader_config.triangulate = true;
@@ -616,6 +603,7 @@ void Initialize(const std::string& strExePath)
 	auto& materials = reader.GetMaterials();
 
 	std::vector <std::vector<float>> shapeVertices{};
+	std::cout << inputfile << std::endl;
 	printf("# of vertices  = %d\n", (int)(attrib.vertices.size()) / 3);
 	printf("# of normals   = %d\n", (int)(attrib.normals.size()) / 3);
 	printf("# of texcoords = %d\n", (int)(attrib.texcoords.size()) / 2);
@@ -682,25 +670,21 @@ void Initialize(const std::string& strExePath)
 		}
 	}
 
-	ShapesVAO.resize(shapes.size());
-	ShapesVBO.resize(shapes.size());
-	ShapesVertexCounts.resize(shapes.size());
+	Tank1VAO.resize(shapes.size());
+	Tank1VBO.resize(shapes.size());
+	Tank1VertexCounts.resize(shapes.size());
 
 	for (size_t s = 0; s < shapes.size(); s++) {
-		GLuint& vao = ShapesVAO[s];
-		GLuint& vbo = ShapesVBO[s];
+		glGenVertexArrays(1, &Tank1VAO[s]);
+		glGenBuffers(1, &Tank1VBO[s]);
+		glBindVertexArray(Tank1VAO[s]);
 
-		std::vector<float>& buffer = shapeVertices[s];
-		glGenVertexArrays(1, &vao);
-		glGenBuffers(1, &vbo);
-		glBindVertexArray(vao);
-
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferData(GL_ARRAY_BUFFER, buffer.size() * sizeof(float), buffer.data(), GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, Tank1VBO[s]);
+		glBufferData(GL_ARRAY_BUFFER, shapeVertices[s].size() * sizeof(float), shapeVertices[s].data(), GL_STATIC_DRAW);
 
 		float attribSize = 11 * sizeof(float);
 
-		ShapesVertexCounts[s] = buffer.size() / 11;
+		Tank1VertexCounts[s] = shapeVertices[s].size() / 11;
 
 		// position attribute
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, attribSize, (void*)0);
@@ -719,8 +703,272 @@ void Initialize(const std::string& strExePath)
 		glEnableVertexAttribArray(3);
 
 	}
+}
+void importTank2(const std::string& strExePath) {
+	std::string inputfile = strExePath + "\\Tank2.obj";
+	tinyobj::ObjReaderConfig reader_config;
+	reader_config.mtl_search_path = strExePath + "\\"; // Path to material files
+	reader_config.triangulate = true;
+	reader_config.vertex_color = true;
+	tinyobj::ObjReader reader;
+
+	if (!reader.ParseFromFile(inputfile, reader_config)) {
+		if (!reader.Error().empty()) {
+			std::cerr << "TinyObjReader: " << reader.Error();
+		}
+		exit(1);
+	}
+
+	if (!reader.Warning().empty()) {
+		std::cout << "TinyObjReader: " << reader.Warning();
+	}
+	auto& attrib = reader.GetAttrib();
+	auto& shapes = reader.GetShapes();
+	auto& materials = reader.GetMaterials();
+
+	std::vector <std::vector<float>> shapeVertices{};
+	std::cout << inputfile << std::endl;
+	printf("# of vertices  = %d\n", (int)(attrib.vertices.size()) / 3);
+	printf("# of normals   = %d\n", (int)(attrib.normals.size()) / 3);
+	printf("# of texcoords = %d\n", (int)(attrib.texcoords.size()) / 2);
+	printf("# of vertex colors = %d\n", (int)(attrib.colors.size()) / 3);
+	printf("# of materials = %d\n", (int)materials.size());
+	printf("# of shapes    = %d\n\n", (int)shapes.size());
+
+	// Loop over shapes
+	for (size_t s = 0; s < shapes.size(); s++) {
+		// Loop over faces(polygon)
+		size_t index_offset = 0;
+
+		shapeVertices.emplace_back();
+
+		for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++) {
+			size_t fv = size_t(shapes[s].mesh.num_face_vertices[f]);
+			std::vector<float>& currentShapeBuffer = shapeVertices.back();
+
+			// per-face material
+			auto& material = materials[shapes[s].mesh.material_ids[f]];
+			tinyobj::real_t red = material.diffuse[0];
+			tinyobj::real_t green = material.diffuse[1];
+			tinyobj::real_t blue = material.diffuse[2];
+
+			// Loop over vertices in the face.
+			for (size_t v = 0; v < fv; v++) {
+				// access to vertex
+				tinyobj::index_t idx = shapes[s].mesh.indices[index_offset + v];
+				tinyobj::real_t vx = attrib.vertices[3 * size_t(idx.vertex_index) + 0];
+				tinyobj::real_t vy = attrib.vertices[3 * size_t(idx.vertex_index) + 1];
+				tinyobj::real_t vz = attrib.vertices[3 * size_t(idx.vertex_index) + 2];
+
+				// Check if `normal_index` is zero or positive. negative = no normal data
+				tinyobj::real_t nx = 0;
+				tinyobj::real_t ny = 0;
+				tinyobj::real_t nz = 0;
+
+				if (idx.normal_index >= 0) {
+					nx = attrib.normals[3 * size_t(idx.normal_index) + 0];
+					ny = attrib.normals[3 * size_t(idx.normal_index) + 1];
+					nz = attrib.normals[3 * size_t(idx.normal_index) + 2];
+				}
+
+				// Check if `texcoord_index` is zero or positive. negative = no texcoord data
+				tinyobj::real_t tx = 0;
+				tinyobj::real_t ty = 0;
+
+				if (idx.texcoord_index >= 0) {
+					tx = attrib.texcoords[2 * size_t(idx.texcoord_index) + 0];
+					ty = attrib.texcoords[2 * size_t(idx.texcoord_index) + 1];
+				}
+
+				// Optional: vertex colors
+				//tinyobj::real_t red = attrib.colors[3 * size_t(idx.vertex_index) + 0];
+				//tinyobj::real_t green = attrib.colors[3 * size_t(idx.vertex_index) + 1];
+				//tinyobj::real_t blue = attrib.colors[3 * size_t(idx.vertex_index) + 2];
+
+				currentShapeBuffer.insert(currentShapeBuffer.end(), {
+					vx, vy, vz, nx, ny, nz, tx, ty, red, green, blue });
+			}
+			index_offset += fv;
 
 
+		}
+	}
+
+	Tank2VAO.resize(shapes.size());
+	Tank2VBO.resize(shapes.size());
+	Tank2VertexCounts.resize(shapes.size());
+
+	for (size_t s = 0; s < shapes.size(); s++) {
+		glGenVertexArrays(1, &Tank2VAO[s]);
+		glGenBuffers(1, &Tank2VBO[s]);
+		glBindVertexArray(Tank2VAO[s]);
+
+		glBindBuffer(GL_ARRAY_BUFFER, Tank2VBO[s]);
+		glBufferData(GL_ARRAY_BUFFER, shapeVertices[s].size() * sizeof(float), shapeVertices[s].data(), GL_STATIC_DRAW);
+
+		float attribSize = 11 * sizeof(float);
+
+		Tank2VertexCounts[s] = shapeVertices[s].size() / 11;
+
+		// position attribute
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, attribSize, (void*)0);
+		glEnableVertexAttribArray(0);
+
+		// color attribute
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, attribSize, (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+
+		// texture coord attribute
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, attribSize, (void*)(6 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+
+		// colors attribute
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, attribSize, (void*)(8 * sizeof(float)));
+		glEnableVertexAttribArray(3);
+
+	}
+}
+void importTank3(const std::string& strExePath) {
+	std::string inputfile = strExePath + "\\Tank3.obj";
+	tinyobj::ObjReaderConfig reader_config;
+	reader_config.mtl_search_path = strExePath + "\\"; // Path to material files
+	reader_config.triangulate = true;
+	reader_config.vertex_color = true;
+	tinyobj::ObjReader reader;
+
+	if (!reader.ParseFromFile(inputfile, reader_config)) {
+		if (!reader.Error().empty()) {
+			std::cerr << "TinyObjReader: " << reader.Error();
+		}
+		exit(1);
+	}
+
+	if (!reader.Warning().empty()) {
+		std::cout << "TinyObjReader: " << reader.Warning();
+	}
+	auto& attrib = reader.GetAttrib();
+	auto& shapes = reader.GetShapes();
+	auto& materials = reader.GetMaterials();
+
+	std::vector <std::vector<float>> shapeVertices{};
+	std::cout << inputfile << std::endl;
+	printf("# of vertices  = %d\n", (int)(attrib.vertices.size()) / 3);
+	printf("# of normals   = %d\n", (int)(attrib.normals.size()) / 3);
+	printf("# of texcoords = %d\n", (int)(attrib.texcoords.size()) / 2);
+	printf("# of vertex colors = %d\n", (int)(attrib.colors.size()) / 3);
+	printf("# of materials = %d\n", (int)materials.size());
+	printf("# of shapes    = %d\n\n", (int)shapes.size());
+
+	// Loop over shapes
+	for (size_t s = 0; s < shapes.size(); s++) {
+		// Loop over faces(polygon)
+		size_t index_offset = 0;
+
+		shapeVertices.emplace_back();
+
+		for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++) {
+			size_t fv = size_t(shapes[s].mesh.num_face_vertices[f]);
+			std::vector<float>& currentShapeBuffer = shapeVertices.back();
+
+			// per-face material
+			auto& material = materials[shapes[s].mesh.material_ids[f]];
+			tinyobj::real_t red = material.diffuse[0];
+			tinyobj::real_t green = material.diffuse[1];
+			tinyobj::real_t blue = material.diffuse[2];
+
+			// Loop over vertices in the face.
+			for (size_t v = 0; v < fv; v++) {
+				// access to vertex
+				tinyobj::index_t idx = shapes[s].mesh.indices[index_offset + v];
+				tinyobj::real_t vx = attrib.vertices[3 * size_t(idx.vertex_index) + 0];
+				tinyobj::real_t vy = attrib.vertices[3 * size_t(idx.vertex_index) + 1];
+				tinyobj::real_t vz = attrib.vertices[3 * size_t(idx.vertex_index) + 2];
+
+				// Check if `normal_index` is zero or positive. negative = no normal data
+				tinyobj::real_t nx = 0;
+				tinyobj::real_t ny = 0;
+				tinyobj::real_t nz = 0;
+
+				if (idx.normal_index >= 0) {
+					nx = attrib.normals[3 * size_t(idx.normal_index) + 0];
+					ny = attrib.normals[3 * size_t(idx.normal_index) + 1];
+					nz = attrib.normals[3 * size_t(idx.normal_index) + 2];
+				}
+
+				// Check if `texcoord_index` is zero or positive. negative = no texcoord data
+				tinyobj::real_t tx = 0;
+				tinyobj::real_t ty = 0;
+
+				if (idx.texcoord_index >= 0) {
+					tx = attrib.texcoords[2 * size_t(idx.texcoord_index) + 0];
+					ty = attrib.texcoords[2 * size_t(idx.texcoord_index) + 1];
+				}
+
+				// Optional: vertex colors
+				//tinyobj::real_t red = attrib.colors[3 * size_t(idx.vertex_index) + 0];
+				//tinyobj::real_t green = attrib.colors[3 * size_t(idx.vertex_index) + 1];
+				//tinyobj::real_t blue = attrib.colors[3 * size_t(idx.vertex_index) + 2];
+
+				currentShapeBuffer.insert(currentShapeBuffer.end(), {
+					vx, vy, vz, nx, ny, nz, tx, ty, red, green, blue });
+			}
+			index_offset += fv;
+
+
+		}
+	}
+
+	Tank3VAO.resize(shapes.size());
+	Tank3VBO.resize(shapes.size());
+	Tank3VertexCounts.resize(shapes.size());
+
+	for (size_t s = 0; s < shapes.size(); s++) {
+		glGenVertexArrays(1, &Tank3VAO[s]);
+		glGenBuffers(1, &Tank3VBO[s]);
+		glBindVertexArray(Tank3VAO[s]);
+
+		glBindBuffer(GL_ARRAY_BUFFER, Tank3VBO[s]);
+		glBufferData(GL_ARRAY_BUFFER, shapeVertices[s].size() * sizeof(float), shapeVertices[s].data(), GL_STATIC_DRAW);
+
+		float attribSize = 11 * sizeof(float);
+
+		Tank3VertexCounts[s] = shapeVertices[s].size() / 11;
+
+		// position attribute
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, attribSize, (void*)0);
+		glEnableVertexAttribArray(0);
+
+		// color attribute
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, attribSize, (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+
+		// texture coord attribute
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, attribSize, (void*)(6 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+
+		// colors attribute
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, attribSize, (void*)(8 * sizeof(float)));
+		glEnableVertexAttribArray(3);
+
+	}
+}
+void Initialize(const std::string& strExePath)
+{
+	glClearColor(0.5f, 0.8f, 0.9f, 1.0f); // culoarea de fond a ecranului
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_COLOR_MATERIAL);
+	glDisable(GL_LIGHTING);
+
+	//glFrontFace(GL_CCW);
+	//glCullFace(GL_BACK);
+	CreateSkyboxVBO(strExePath);
+	CreateVBO();
+	CreateShaders();
+	CreateTextures(strExePath);
+	importTank1(strExePath);
+	importTank2(strExePath);
+	importTank3(strExePath);
 	// Create camera
 	pCamera = new Camera(SCR_WIDTH, SCR_HEIGHT, glm::vec3(0.5, 4.0, 10));
 }
@@ -754,20 +1002,20 @@ void RenderTank1() {
 
 	//drawing and scaling the object in the meant place
 	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 2);
-	glm::mat4 position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(0.0f+i, 0.08f, 0.0f)), glm::vec3(0.01f, 0.01f, 0.01f));
+	glm::mat4 position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(0.0f + i, 0.08f, 0.0f)), glm::vec3(0.01f, 0.01f, 0.01f));
 	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
 
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, texture3Location);
 
-	for (size_t s = 0; s < ShapesVAO.size(); s++) {
-		GLuint& vao = ShapesVAO[s];
-		GLuint& vbo = ShapesVBO[s];
+	for (size_t s = 0; s < Tank1VAO.size(); s++) {
+		GLuint& vao = Tank1VAO[s];
+		GLuint& vbo = Tank1VBO[s];
 
 		glBindVertexArray(vao);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-		glDrawArrays(GL_TRIANGLES, 0, ShapesVertexCounts[s]);
+		glDrawArrays(GL_TRIANGLES, 0, Tank1VertexCounts[s]);
 	}
 
 	//drawing the same obj again
@@ -778,14 +1026,14 @@ void RenderTank1() {
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, texture4Location);
 
-	for (size_t s = 0; s < ShapesVAO.size(); s++) {
-		GLuint& vao = ShapesVAO[s];
-		GLuint& vbo = ShapesVBO[s];
+	for (size_t s = 0; s < Tank1VAO.size(); s++) {
+		GLuint& vao = Tank1VAO[s];
+		GLuint& vbo = Tank1VBO[s];
 
 		glBindVertexArray(vao);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-		glDrawArrays(GL_TRIANGLES, 0, ShapesVertexCounts[s]);
+		glDrawArrays(GL_TRIANGLES, 0, Tank1VertexCounts[s]);
 	}
 
 	//and again
@@ -796,14 +1044,151 @@ void RenderTank1() {
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, texture5Location);
 
-	for (size_t s = 0; s < ShapesVAO.size(); s++) {
-		GLuint& vao = ShapesVAO[s];
-		GLuint& vbo = ShapesVBO[s];
+	for (size_t s = 0; s < Tank1VAO.size(); s++) {
+		GLuint& vao = Tank1VAO[s];
+		GLuint& vbo = Tank1VBO[s];
 
 		glBindVertexArray(vao);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-		glDrawArrays(GL_TRIANGLES, 0, ShapesVertexCounts[s]);
+		glDrawArrays(GL_TRIANGLES, 0, Tank1VertexCounts[s]);
+	}
+}
+void RenderTank2() {
+	//glUseProgram(ShapeProgramId);
+
+	//unsigned int projMatrixLocation = glGetUniformLocation(ShapeProgramId, "ProjMatrix");
+	//unsigned int viewMatrixLocation = glGetUniformLocation(ShapeProgramId, "ViewMatrix");
+	unsigned int worldMatrixLocation = glGetUniformLocation(ShapeProgramId, "WorldMatrix");
+	/*
+	glm::mat4 projection = pCamera->GetProjectionMatrix();
+	glUniformMatrix4fv(projMatrixLocation, 1, GL_FALSE, glm::value_ptr(projection));
+
+	glm::mat4 view = pCamera->GetViewMatrix();
+	glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(view));*/
+
+	//drawing and scaling the object in the meant place
+	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 4);
+	glm::mat4 position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(-3.0f, 0.4f, -2.0f)), glm::vec3(0.035f, 0.035f, 0.035f));
+	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
+
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, texture5Location);
+
+	for (size_t s = 0; s < Tank2VAO.size(); s++) {
+		GLuint& vao = Tank2VAO[s];
+		GLuint& vbo = Tank2VBO[s];
+
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+		glDrawArrays(GL_TRIANGLES, 0, Tank2VertexCounts[s]);
+	}
+
+	//drawing and scaling the object in the meant place
+	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 2);
+	position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(-4.5f, 0.4f, -2.0f)), glm::vec3(0.035f, 0.035f, 0.035f));
+	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, texture3Location);
+
+	for (size_t s = 0; s < Tank2VAO.size(); s++) {
+		GLuint& vao = Tank2VAO[s];
+		GLuint& vbo = Tank2VBO[s];
+
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+		glDrawArrays(GL_TRIANGLES, 0, Tank2VertexCounts[s]);
+	}
+
+	//drawing and scaling the object in the meant place
+	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 3);
+	position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(-6.0f, 0.4f, -2.0f)), glm::vec3(0.035f, 0.035f, 0.035f));
+	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
+
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, texture4Location);
+
+	for (size_t s = 0; s < Tank2VAO.size(); s++) {
+		GLuint& vao = Tank2VAO[s];
+		GLuint& vbo = Tank2VBO[s];
+
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+		glDrawArrays(GL_TRIANGLES, 0, Tank2VertexCounts[s]);
+	}
+}
+void RenderTank3() {
+	//glUseProgram(ShapeProgramId);
+
+	//unsigned int projMatrixLocation = glGetUniformLocation(ShapeProgramId, "ProjMatrix");
+	unsigned int viewMatrixLocation = glGetUniformLocation(ShapeProgramId, "ViewMatrix");
+	unsigned int worldMatrixLocation = glGetUniformLocation(ShapeProgramId, "WorldMatrix");
+	/*
+	glm::mat4 projection = pCamera->GetProjectionMatrix();
+	glUniformMatrix4fv(projMatrixLocation, 1, GL_FALSE, glm::value_ptr(projection));
+
+	glm::mat4 view = pCamera->GetViewMatrix();
+	glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(view));*/
+
+	//drawing and scaling the object in the meant place
+	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 4);
+	glm::mat4 position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(-9.0f, 0.025f, -0.0f)), glm::vec3(0.5f, 0.5f, 0.5f));
+	position = glm::rotate(position, glm::pi<float>()/2, glm::vec3(0, 1, 0));
+	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
+
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, texture5Location);
+
+	for (size_t s = 0; s < Tank3VAO.size(); s++) {
+		GLuint& vao = Tank3VAO[s];
+		GLuint& vbo = Tank3VBO[s];
+
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+		glDrawArrays(GL_TRIANGLES, 0, Tank3VertexCounts[s]);
+	}
+
+	//drawing and scaling the object in the meant place
+	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 2);
+	 position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(-9.0f, 0.025f, 2.0f)), glm::vec3(0.5f, 0.5f, 0.5f));
+	position = glm::rotate(position, glm::pi<float>() / 2, glm::vec3(0, 1, 0));
+	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, texture3Location);
+
+	for (size_t s = 0; s < Tank3VAO.size(); s++) {
+		GLuint& vao = Tank3VAO[s];
+		GLuint& vbo = Tank3VBO[s];
+
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+		glDrawArrays(GL_TRIANGLES, 0, Tank3VertexCounts[s]);
+	}
+
+	//drawing and scaling the object in the meant place
+	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 3);
+	position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(-9.0f, 0.025f, 4.0f)), glm::vec3(0.5f, 0.5f, 0.5f));
+	position = glm::rotate(position, glm::pi<float>() / 2, glm::vec3(0, 1, 0));
+	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
+
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, texture4Location);
+
+	for (size_t s = 0; s < Tank3VAO.size(); s++) {
+		GLuint& vao = Tank3VAO[s];
+		GLuint& vbo = Tank3VBO[s];
+
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+		glDrawArrays(GL_TRIANGLES, 0, Tank3VertexCounts[s]);
 	}
 }
 void RenderFunction()
@@ -866,6 +1251,8 @@ void RenderFunction()
 		}
 	}
 	RenderTank1();
+	RenderTank2();
+	RenderTank3();
 }
 
 void Cleanup()

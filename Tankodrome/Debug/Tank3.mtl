@@ -1,0 +1,44 @@
+# Blender MTL File: 'old_tank (1).blend'
+# Material Count: 3
+
+newmtl Material.017
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump D:\\Downloads\\textures\\tank_par_3_DefaultMaterial_Normal.png
+map_Kd D:\\Downloads\\textures\\tank_par_3_DefaultMaterial_BaseColor.png
+map_Ns D:\\Downloads\\textures\\tank_par_3_DefaultMaterial_Roughness.png
+refl D:\\Downloads\\textures\\tank_par_3_DefaultMaterial_Metallic.png
+
+newmtl Material.018
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump D:\\Downloads\\textures\\tank_part_1_DefaultMaterial_Normal.png
+map_Kd D:\\Downloads\\textures\\tank_part_1_DefaultMaterial_BaseColor.png
+map_Ns D:\\Downloads\\textures\\tank_part_1_DefaultMaterial_Roughness.png
+refl D:\\Downloads\\textures\\tank_part_1_DefaultMaterial_Metallic.png
+
+newmtl Material.019
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump D:\\Downloads\\textures\\tank_par_2_DefaultMaterial_Normal.png
+map_Kd D:\\Downloads\\textures\\tank_par_2_DefaultMaterial_BaseColor.png
+map_Ns D:\\Downloads\\textures\\tank_par_2_DefaultMaterial_Roughness.png
+refl D:\\Downloads\\textures\\tank_par_2_DefaultMaterial_Metallic.png
