@@ -25,7 +25,7 @@
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 GLuint cubemapTexture;
-float i = 0;
+float planePath =0,j = 0;
 enum ECameraMovementType
 {
 	UNKNOWN,
@@ -234,8 +234,8 @@ unsigned int VertexShaderId, FragmentShaderId, ProgramId;
 GLuint ProjMatrixLocation, ViewMatrixLocation, WorldMatrixLocation;
 unsigned int texture1Location, texture2Location, texture3Location, texture4Location, texture5Location;
 
-std::vector<GLuint> Tank1VAO, Tank1VBO, Tank2VAO, Tank2VBO, Tank3VAO, Tank3VBO;
-std::vector<size_t> Tank1VertexCounts, Tank2VertexCounts, Tank3VertexCounts;
+std::vector<GLuint> Tank1VAO, Tank1VBO, Tank2VAO, Tank2VBO, Tank3VAO, Tank3VBO, PlaneVAO,PlaneVBO;
+std::vector<size_t> Tank1VertexCounts, Tank2VertexCounts, Tank3VertexCounts, PlaneVertexCounts;
 unsigned int ShapeProgramId;
 
 //initializari skybox
@@ -952,6 +952,130 @@ void importTank3(const std::string& strExePath) {
 
 	}
 }
+void importPlane(const std::string& strExePath) {
+	std::string inputfile = strExePath + "\\Plane.obj";
+	tinyobj::ObjReaderConfig reader_config;
+	reader_config.mtl_search_path = strExePath + "\\"; // Path to material files
+	reader_config.triangulate = true;
+	reader_config.vertex_color = true;
+	tinyobj::ObjReader reader;
+
+	if (!reader.ParseFromFile(inputfile, reader_config)) {
+		if (!reader.Error().empty()) {
+			std::cerr << "TinyObjReader: " << reader.Error();
+		}
+		exit(1);
+	}
+
+	if (!reader.Warning().empty()) {
+		std::cout << "TinyObjReader: " << reader.Warning();
+	}
+	auto& attrib = reader.GetAttrib();
+	auto& shapes = reader.GetShapes();
+	auto& materials = reader.GetMaterials();
+
+	std::vector <std::vector<float>> shapeVertices{};
+	std::cout << inputfile << std::endl;
+	printf("# of vertices  = %d\n", (int)(attrib.vertices.size()) / 3);
+	printf("# of normals   = %d\n", (int)(attrib.normals.size()) / 3);
+	printf("# of texcoords = %d\n", (int)(attrib.texcoords.size()) / 2);
+	printf("# of vertex colors = %d\n", (int)(attrib.colors.size()) / 3);
+	printf("# of materials = %d\n", (int)materials.size());
+	printf("# of shapes    = %d\n\n", (int)shapes.size());
+
+	// Loop over shapes
+	for (size_t s = 0; s < shapes.size(); s++) {
+		// Loop over faces(polygon)
+		size_t index_offset = 0;
+
+		shapeVertices.emplace_back();
+
+		for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++) {
+			size_t fv = size_t(shapes[s].mesh.num_face_vertices[f]);
+			std::vector<float>& currentShapeBuffer = shapeVertices.back();
+
+			// per-face material
+			auto& material = materials[shapes[s].mesh.material_ids[f]];
+			tinyobj::real_t red = material.diffuse[0];
+			tinyobj::real_t green = material.diffuse[1];
+			tinyobj::real_t blue = material.diffuse[2];
+
+			// Loop over vertices in the face.
+			for (size_t v = 0; v < fv; v++) {
+				// access to vertex
+				tinyobj::index_t idx = shapes[s].mesh.indices[index_offset + v];
+				tinyobj::real_t vx = attrib.vertices[3 * size_t(idx.vertex_index) + 0];
+				tinyobj::real_t vy = attrib.vertices[3 * size_t(idx.vertex_index) + 1];
+				tinyobj::real_t vz = attrib.vertices[3 * size_t(idx.vertex_index) + 2];
+
+				// Check if `normal_index` is zero or positive. negative = no normal data
+				tinyobj::real_t nx = 0;
+				tinyobj::real_t ny = 0;
+				tinyobj::real_t nz = 0;
+
+				if (idx.normal_index >= 0) {
+					nx = attrib.normals[3 * size_t(idx.normal_index) + 0];
+					ny = attrib.normals[3 * size_t(idx.normal_index) + 1];
+					nz = attrib.normals[3 * size_t(idx.normal_index) + 2];
+				}
+
+				// Check if `texcoord_index` is zero or positive. negative = no texcoord data
+				tinyobj::real_t tx = 0;
+				tinyobj::real_t ty = 0;
+
+				if (idx.texcoord_index >= 0) {
+					tx = attrib.texcoords[2 * size_t(idx.texcoord_index) + 0];
+					ty = attrib.texcoords[2 * size_t(idx.texcoord_index) + 1];
+				}
+
+				// Optional: vertex colors
+				//tinyobj::real_t red = attrib.colors[3 * size_t(idx.vertex_index) + 0];
+				//tinyobj::real_t green = attrib.colors[3 * size_t(idx.vertex_index) + 1];
+				//tinyobj::real_t blue = attrib.colors[3 * size_t(idx.vertex_index) + 2];
+
+				currentShapeBuffer.insert(currentShapeBuffer.end(), {
+					vx, vy, vz, nx, ny, nz, tx, ty, red, green, blue });
+			}
+			index_offset += fv;
+
+
+		}
+	}
+
+	PlaneVAO.resize(shapes.size());
+	PlaneVBO.resize(shapes.size());
+	PlaneVertexCounts.resize(shapes.size());
+
+	for (size_t s = 0; s < shapes.size(); s++) {
+		glGenVertexArrays(1, &PlaneVAO[s]);
+		glGenBuffers(1, &PlaneVBO[s]);
+		glBindVertexArray(PlaneVAO[s]);
+
+		glBindBuffer(GL_ARRAY_BUFFER, PlaneVBO[s]);
+		glBufferData(GL_ARRAY_BUFFER, shapeVertices[s].size() * sizeof(float), shapeVertices[s].data(), GL_STATIC_DRAW);
+
+		float attribSize = 11 * sizeof(float);
+
+		PlaneVertexCounts[s] = shapeVertices[s].size() / 11;
+
+		// position attribute
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, attribSize, (void*)0);
+		glEnableVertexAttribArray(0);
+
+		// color attribute
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, attribSize, (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+
+		// texture coord attribute
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, attribSize, (void*)(6 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+
+		// colors attribute
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, attribSize, (void*)(8 * sizeof(float)));
+		glEnableVertexAttribArray(3);
+
+	}
+}
 void Initialize(const std::string& strExePath)
 {
 	glClearColor(0.5f, 0.8f, 0.9f, 1.0f); // culoarea de fond a ecranului
@@ -969,6 +1093,7 @@ void Initialize(const std::string& strExePath)
 	importTank1(strExePath);
 	importTank2(strExePath);
 	importTank3(strExePath);
+	importPlane(strExePath);
 	// Create camera
 	pCamera = new Camera(SCR_WIDTH, SCR_HEIGHT, glm::vec3(0.5, 4.0, 10));
 }
@@ -1002,7 +1127,7 @@ void RenderTank1() {
 
 	//drawing and scaling the object in the meant place
 	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 2);
-	glm::mat4 position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(0.0f + i, 0.08f, 0.0f)), glm::vec3(0.01f, 0.01f, 0.01f));
+	glm::mat4 position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(0.0f, 0.08f, 0.0f)), glm::vec3(0.01f, 0.01f, 0.01f));
 	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
 
 	glActiveTexture(GL_TEXTURE2);
@@ -1191,6 +1316,38 @@ void RenderTank3() {
 		glDrawArrays(GL_TRIANGLES, 0, Tank3VertexCounts[s]);
 	}
 }
+void RenderPlane() {
+	//glUseProgram(ShapeProgramId);
+
+	//unsigned int projMatrixLocation = glGetUniformLocation(ShapeProgramId, "ProjMatrix");
+	unsigned int viewMatrixLocation = glGetUniformLocation(ShapeProgramId, "ViewMatrix");
+	unsigned int worldMatrixLocation = glGetUniformLocation(ShapeProgramId, "WorldMatrix");
+	/*
+	glm::mat4 projection = pCamera->GetProjectionMatrix();
+	glUniformMatrix4fv(projMatrixLocation, 1, GL_FALSE, glm::value_ptr(projection));
+
+	glm::mat4 view = pCamera->GetViewMatrix();
+	glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(view));*/
+
+	//drawing and scaling the object in the meant place
+	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 4);
+	glm::mat4 position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(10*glm::sin(planePath), 5.00f, 10*glm::cos(planePath))), glm::vec3(0.25f, 0.25f, 0.25f));
+	position = glm::rotate(position, planePath +glm::pi<float>()/2, glm::vec3(0, 1, 0));
+	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
+
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, texture5Location);
+
+	for (size_t s = 0; s < PlaneVAO.size(); s++) {
+		GLuint& vao = PlaneVAO[s];
+		GLuint& vbo = PlaneVBO[s];
+
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+		glDrawArrays(GL_TRIANGLES, 0, PlaneVertexCounts[s]);
+	}
+}
 void RenderFunction()
 {
 	//glm::vec3 cubePositions[] = {
@@ -1253,6 +1410,7 @@ void RenderFunction()
 	RenderTank1();
 	RenderTank2();
 	RenderTank3();
+	RenderPlane();
 }
 
 void Cleanup()
@@ -1348,7 +1506,7 @@ int main(int argc, char** argv)
 
 	// render loop
 	while (!glfwWindowShouldClose(window)) {
-		//i += 0.01; //movement
+		planePath += 0.01; //movement
 		// per-frame time logic
 		double currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
