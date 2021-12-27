@@ -25,7 +25,7 @@
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 GLuint cubemapTexture;
-float planePath =0,j = 0;
+float planePath = 0, rotatie = 0, tankX = -3.0f, tankZ = -2.0f;
 enum ECameraMovementType
 {
 	UNKNOWN,
@@ -234,7 +234,7 @@ unsigned int VertexShaderId, FragmentShaderId, ProgramId;
 GLuint ProjMatrixLocation, ViewMatrixLocation, WorldMatrixLocation;
 unsigned int texture1Location, texture2Location, texture3Location, texture4Location, texture5Location;
 
-std::vector<GLuint> Tank1VAO, Tank1VBO, Tank2VAO, Tank2VBO, Tank3VAO, Tank3VBO, PlaneVAO,PlaneVBO;
+std::vector<GLuint> Tank1VAO, Tank1VBO, Tank2VAO, Tank2VBO, Tank3VAO, Tank3VBO, PlaneVAO, PlaneVBO;
 std::vector<size_t> Tank1VertexCounts, Tank2VertexCounts, Tank3VertexCounts, PlaneVertexCounts;
 unsigned int ShapeProgramId;
 
@@ -1127,7 +1127,9 @@ void RenderTank1() {
 
 	//drawing and scaling the object in the meant place
 	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 2);
-	glm::mat4 position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(0.0f, 0.08f, 0.0f)), glm::vec3(0.01f, 0.01f, 0.01f));
+	glm::mat4 position = glm::translate(glm::mat4(1.0), glm::vec3(0, 0.08, 0));
+	position = glm::scale(position, glm::vec3(0.01f, 0.01f, 0.01f));
+	//position = glm::rotate(position, rotatie, glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
 
 	glActiveTexture(GL_TEXTURE2);
@@ -1191,10 +1193,13 @@ void RenderTank2() {
 
 	glm::mat4 view = pCamera->GetViewMatrix();
 	glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(view));*/
-
+	//glm::vec3(-3.0f+inainte * glm::sin(rotatie), 0.4f, -2.0f+inainte * glm::cos(rotatie))
 	//drawing and scaling the object in the meant place
+	//glm::vec3(-3.0f + tankX, 0.4f, -2.0f + inainte)
 	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 4);
-	glm::mat4 position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(-3.0f, 0.4f, -2.0f)), glm::vec3(0.035f, 0.035f, 0.035f));
+	glm::mat4 position = glm::translate(glm::mat4(1.0), glm::vec3(tankX, 0.4f, tankZ));
+	position = glm::scale(position, glm::vec3(0.035f, 0.035f, 0.035f));
+	position = glm::rotate(position, rotatie, glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
 
 	glActiveTexture(GL_TEXTURE4);
@@ -1211,6 +1216,7 @@ void RenderTank2() {
 	}
 
 	//drawing and scaling the object in the meant place
+	//glm::vec3(-3.0f+inainte * glm::sin(rotatie), 0.4f, -2.0f+inainte * glm::cos(rotatie))
 	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 2);
 	position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(-4.5f, 0.4f, -2.0f)), glm::vec3(0.035f, 0.035f, 0.035f));
 	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
@@ -1262,7 +1268,7 @@ void RenderTank3() {
 	//drawing and scaling the object in the meant place
 	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 4);
 	glm::mat4 position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(-9.0f, 0.025f, -0.0f)), glm::vec3(0.5f, 0.5f, 0.5f));
-	position = glm::rotate(position, glm::pi<float>()/2, glm::vec3(0, 1, 0));
+	position = glm::rotate(position, glm::pi<float>() / 2, glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
 
 	glActiveTexture(GL_TEXTURE4);
@@ -1280,7 +1286,7 @@ void RenderTank3() {
 
 	//drawing and scaling the object in the meant place
 	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 2);
-	 position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(-9.0f, 0.025f, 2.0f)), glm::vec3(0.5f, 0.5f, 0.5f));
+	position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(-9.0f, 0.025f, 2.0f)), glm::vec3(0.5f, 0.5f, 0.5f));
 	position = glm::rotate(position, glm::pi<float>() / 2, glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
 
@@ -1331,8 +1337,8 @@ void RenderPlane() {
 
 	//drawing and scaling the object in the meant place
 	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 4);
-	glm::mat4 position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(10*glm::sin(planePath), 5.00f, 10*glm::cos(planePath))), glm::vec3(0.25f, 0.25f, 0.25f));
-	position = glm::rotate(position, planePath +glm::pi<float>()/2, glm::vec3(0, 1, 0));
+	glm::mat4 position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(10 * glm::sin(planePath), 5.00f, 10 * glm::cos(planePath))), glm::vec3(0.25f, 0.25f, 0.25f));
+	position = glm::rotate(position, planePath + glm::pi<float>() / 2, glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
 
 	glActiveTexture(GL_TEXTURE4);
@@ -1426,6 +1432,9 @@ void drawSkybox(Shader skyboxShader) {
 	glDepthFunc(GL_LEQUAL);
 
 	skyboxShader.Activate();
+	//lapse between day and night
+	//glUniform1f(glGetUniformLocation(skyboxShader.ID, "cringe"), glm::sin(planePath) * glm::sin(planePath));
+	glUniform1f(glGetUniformLocation(skyboxShader.ID, "cringe"), 1);
 	glm::mat4 view = glm::mat4(1.0f);
 	glm::mat4 projection = glm::mat4(1.0f);
 	// We make the mat4 into a mat3 and then a mat4 again in order to get rid of the last row and column
@@ -1513,8 +1522,8 @@ int main(int argc, char** argv)
 		lastFrame = currentFrame;
 		// render
 		RenderFunction();
-
 		drawSkybox(skyboxShader);
+
 		// input
 		processInput(window);
 
@@ -1555,6 +1564,28 @@ void processInput(GLFWwindow* window)
 		pCamera->Reset(width, height);
 
 	}
+
+	float inainte = 0;
+
+	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+		inainte += 0.01;
+	}//E for down
+
+	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+		inainte -= 0.01;
+	}//E for down
+
+	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+		rotatie += 0.005;
+	}//E for down
+
+	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+		rotatie -= 0.005;
+	}//E for down
+
+	tankX += inainte * glm::sin(rotatie);
+	tankZ += inainte * glm::cos(rotatie);
+
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
