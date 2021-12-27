@@ -242,6 +242,7 @@ unsigned int ShapeProgramId;
 
 //initializari skybox
 unsigned int skyboxVAO, skyboxVBO, skyboxEBO;
+unsigned int sunVAO, sunVBO;
 
 Camera* pCamera = nullptr;
 
@@ -328,7 +329,7 @@ void CreateSkyboxVBO(const std::string& strExePath) {
 		strExePath + "\\skyboxLeft.png",
 		strExePath + "\\skyboxTop.png",
 		strExePath + "\\skyboxBottom.png",
-		strExePath + "\\skyboxFront.png",
+		strExePath + "\\skyboxFront.jpg",
 		strExePath + "\\skyboxBack.png"
 	};
 	glGenTextures(1, &cubemapTexture);
@@ -371,6 +372,76 @@ void CreateSkyboxVBO(const std::string& strExePath) {
 		}
 	}
 }
+void CreateSunVBO()
+{
+	float vertices[] = {
+	   -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	   0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	   0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	   0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	   -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	   -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+
+	   -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+	   0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+	   0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+	   0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+	   -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+	   -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+
+	   -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+	   -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+	   -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+	   -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+	   -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+	   -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+
+	   0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+	   0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+	   0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+	   0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+	   0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+	   0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+
+	   -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+	   0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+	   0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+	   0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+	   -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+	   -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+
+	   -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+	   0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+	   0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+	   0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+	   -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+	   -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+	};
+
+	glGenVertexArrays(1, &sunVBO);
+	glGenBuffers(1, &sunVBO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, sunVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	glBindVertexArray(sunVAO);
+
+	// position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	// normal attribute
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+
+	glGenVertexArrays(1, &sunVAO);
+	glBindVertexArray(sunVAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, sunVBO);
+	// note that we update the lamp's position attribute's stride to reflect the updated buffer data
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+}
 void CreateVBO()
 {
 	float square[] = {
@@ -389,8 +460,11 @@ void CreateVBO()
 
 	glBindVertexArray(VAO);
 
+
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(square), square, GL_STATIC_DRAW);
+
+
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(squareIndices), squareIndices, GL_STATIC_DRAW);
@@ -404,6 +478,10 @@ void CreateVBO()
 	// texture coord attribute
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
+
+
+
+
 }
 void DestroyVBO()
 {
@@ -1097,6 +1175,7 @@ void Initialize(const std::string& strExePath)
 	//glFrontFace(GL_CCW);
 	//glCullFace(GL_BACK);
 	CreateSkyboxVBO(strExePath);
+	CreateSunVBO();
 	CreateVBO();
 	CreateShaders();
 	CreateTextures(strExePath);
@@ -1456,8 +1535,8 @@ void drawSkybox(Shader skyboxShader) {
 
 	skyboxShader.Activate();
 	//lapse between day and night
-	//glUniform1f(glGetUniformLocation(skyboxShader.ID, "cringe"), glm::sin(planePath) * glm::sin(planePath));
-	glUniform1f(glGetUniformLocation(skyboxShader.ID, "cringe"), 1);
+	glUniform1f(glGetUniformLocation(skyboxShader.ID, "cringe"), glm::sin(planePath) * glm::sin(planePath));
+	//glUniform1f(glGetUniformLocation(skyboxShader.ID, "cringe"), 1);
 	glm::mat4 view = glm::mat4(1.0f);
 	glm::mat4 projection = glm::mat4(1.0f);
 	// We make the mat4 into a mat3 and then a mat4 again in order to get rid of the last row and column
@@ -1491,6 +1570,7 @@ double lastFrame = 0.0f;
 int main(int argc, char** argv)
 {
 
+	glm::vec3 sunPos(0.0f, 0.0f, 2.0f); // sun pos
 	std::string strFullExeFileName = argv[0];
 	std::string strExePath;
 	const size_t last_slash_idx = strFullExeFileName.rfind('\\');
@@ -1534,6 +1614,9 @@ int main(int argc, char** argv)
 	ShapeProgramId = shapeShader.ID;
 	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 2);
 
+	Shader lampShader("Lamp.vs", "Lamp.fs");
+
+
 	Initialize(strExePath);
 
 	// render loop
@@ -1547,6 +1630,17 @@ int main(int argc, char** argv)
 		RenderFunction();
 		drawSkybox(skyboxShader);
 
+		lampShader.Activate();
+		lampShader.SetMat4("projection", pCamera->GetProjectionMatrix());
+		lampShader.SetMat4("view", pCamera->GetViewMatrix());
+		glm::mat4 model;
+		model = glm::translate(glm::mat4(1.0), glm::vec3(60 * glm::sin(0.1 * currentFrame), 60 * glm::cos(0.1 * currentFrame), 0.0f));
+		model = glm::translate(model, glm::vec3(1.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(1.0f));
+		lampShader.SetMat4("model", model);
+
+		glBindVertexArray(sunVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 		// input
 		processInput(window);
 
