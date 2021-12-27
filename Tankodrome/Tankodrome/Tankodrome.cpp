@@ -25,7 +25,9 @@
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 GLuint cubemapTexture;
-float planePath = 0, rotatie = 0, tankX = -3.0f, tankZ = -2.0f;
+float planePath = 0, rotatie = 0, tankX = -3.0f, tankZ = -2.0f, tank1X = 0, tank1Z = 0;
+int currentTank = 0;
+std::vector<std::tuple<float, float, float>> tankMovement;
 enum ECameraMovementType
 {
 	UNKNOWN,
@@ -1083,7 +1085,15 @@ void Initialize(const std::string& strExePath)
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_COLOR_MATERIAL);
 	glDisable(GL_LIGHTING);
-
+	tankMovement.push_back(std::make_tuple(0.0f, 0.0f, 0.0f));
+	tankMovement.push_back(std::make_tuple(0.0f, 2.0f, 0.0f));
+	tankMovement.push_back(std::make_tuple(0.0f, 4.0f, 0.0f));
+	tankMovement.push_back(std::make_tuple(-3.0f, -2.0f, 0.0f));
+	tankMovement.push_back(std::make_tuple(-4.5f, -2.0f, 0.0f));
+	tankMovement.push_back(std::make_tuple(-6.0f, -2.0f, 0.0f));
+	tankMovement.push_back(std::make_tuple(-9.0f, 0.0f, glm::pi<float>() / 2));
+	tankMovement.push_back(std::make_tuple(-9.0f, 2.0f, glm::pi<float>() / 2));
+	tankMovement.push_back(std::make_tuple(-9.0f, 4.0f, glm::pi<float>() / 2));
 	//glFrontFace(GL_CCW);
 	//glCullFace(GL_BACK);
 	CreateSkyboxVBO(strExePath);
@@ -1127,9 +1137,10 @@ void RenderTank1() {
 
 	//drawing and scaling the object in the meant place
 	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 2);
-	glm::mat4 position = glm::translate(glm::mat4(1.0), glm::vec3(0, 0.08, 0));
+	glUniform1f(glGetUniformLocation(ShapeProgramId, "selected"), currentTank == 0 ? 1.5 : 1.0);
+	glm::mat4 position = glm::translate(glm::mat4(1.0), glm::vec3(std::get<0>(tankMovement[0]), 0.08, std::get<1>(tankMovement[0])));
 	position = glm::scale(position, glm::vec3(0.01f, 0.01f, 0.01f));
-	//position = glm::rotate(position, rotatie, glm::vec3(0, 1, 0));
+	position = glm::rotate(position, std::get<2>(tankMovement[0]), glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
 
 	glActiveTexture(GL_TEXTURE2);
@@ -1147,7 +1158,9 @@ void RenderTank1() {
 
 	//drawing the same obj again
 	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 3);
-	position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(0.0f, 0.08f, 2.0f)), glm::vec3(0.01f, 0.01f, 0.01f));
+	glUniform1f(glGetUniformLocation(ShapeProgramId, "selected"), currentTank == 1 ? 1.5 : 1.0);
+	position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(std::get<0>(tankMovement[1]), 0.08f, std::get<1>(tankMovement[1]))), glm::vec3(0.01f, 0.01f, 0.01f));
+	position = glm::rotate(position, std::get<2>(tankMovement[1]), glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
 
 	glActiveTexture(GL_TEXTURE3);
@@ -1165,7 +1178,9 @@ void RenderTank1() {
 
 	//and again
 	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 4);
-	position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(0.0f, 0.08f, 4.0f)), glm::vec3(0.01f, 0.01f, 0.01f));
+	glUniform1f(glGetUniformLocation(ShapeProgramId, "selected"), currentTank == 2 ? 1.5 : 1.0);
+	position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(std::get<0>(tankMovement[2]), 0.08f, std::get<1>(tankMovement[2]))), glm::vec3(0.01f, 0.01f, 0.01f));
+	position = glm::rotate(position, std::get<2>(tankMovement[2]), glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
 
 	glActiveTexture(GL_TEXTURE4);
@@ -1197,9 +1212,10 @@ void RenderTank2() {
 	//drawing and scaling the object in the meant place
 	//glm::vec3(-3.0f + tankX, 0.4f, -2.0f + inainte)
 	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 4);
-	glm::mat4 position = glm::translate(glm::mat4(1.0), glm::vec3(tankX, 0.4f, tankZ));
+	glUniform1f(glGetUniformLocation(ShapeProgramId, "selected"), currentTank == 3 ? 1.5 : 1.0);
+	glm::mat4 position = glm::translate(glm::mat4(1.0), glm::vec3(std::get<0>(tankMovement[3]), 0.4f, std::get<1>(tankMovement[3])));
 	position = glm::scale(position, glm::vec3(0.035f, 0.035f, 0.035f));
-	position = glm::rotate(position, rotatie, glm::vec3(0, 1, 0));
+	position = glm::rotate(position, std::get<2>(tankMovement[3]), glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
 
 	glActiveTexture(GL_TEXTURE4);
@@ -1218,7 +1234,9 @@ void RenderTank2() {
 	//drawing and scaling the object in the meant place
 	//glm::vec3(-3.0f+inainte * glm::sin(rotatie), 0.4f, -2.0f+inainte * glm::cos(rotatie))
 	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 2);
-	position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(-4.5f, 0.4f, -2.0f)), glm::vec3(0.035f, 0.035f, 0.035f));
+	glUniform1f(glGetUniformLocation(ShapeProgramId, "selected"), currentTank == 4 ? 1.5 : 1.0);
+	position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(std::get<0>(tankMovement[4]), 0.4f, std::get<1>(tankMovement[4]))), glm::vec3(0.035f, 0.035f, 0.035f));
+	position = glm::rotate(position, std::get<2>(tankMovement[4]), glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
 
 	glActiveTexture(GL_TEXTURE2);
@@ -1236,7 +1254,9 @@ void RenderTank2() {
 
 	//drawing and scaling the object in the meant place
 	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 3);
-	position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(-6.0f, 0.4f, -2.0f)), glm::vec3(0.035f, 0.035f, 0.035f));
+	glUniform1f(glGetUniformLocation(ShapeProgramId, "selected"), currentTank == 5 ? 1.5 : 1.0);
+	position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(std::get<0>(tankMovement[5]), 0.4f, std::get<1>(tankMovement[5]))), glm::vec3(0.035f, 0.035f, 0.035f));
+	position = glm::rotate(position, std::get<2>(tankMovement[5]), glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
 
 	glActiveTexture(GL_TEXTURE3);
@@ -1267,8 +1287,9 @@ void RenderTank3() {
 
 	//drawing and scaling the object in the meant place
 	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 4);
-	glm::mat4 position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(-9.0f, 0.025f, -0.0f)), glm::vec3(0.5f, 0.5f, 0.5f));
-	position = glm::rotate(position, glm::pi<float>() / 2, glm::vec3(0, 1, 0));
+	glUniform1f(glGetUniformLocation(ShapeProgramId, "selected"), currentTank == 6 ? 1.5 : 1.0);
+	glm::mat4 position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(std::get<0>(tankMovement[6]), 0.025f, std::get<1>(tankMovement[6]))), glm::vec3(0.5f, 0.5f, 0.5f));
+	position = glm::rotate(position, std::get<2>(tankMovement[6]), glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
 
 	glActiveTexture(GL_TEXTURE4);
@@ -1286,8 +1307,9 @@ void RenderTank3() {
 
 	//drawing and scaling the object in the meant place
 	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 2);
-	position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(-9.0f, 0.025f, 2.0f)), glm::vec3(0.5f, 0.5f, 0.5f));
-	position = glm::rotate(position, glm::pi<float>() / 2, glm::vec3(0, 1, 0));
+	glUniform1f(glGetUniformLocation(ShapeProgramId, "selected"), currentTank == 7 ? 1.5 : 1.0);
+	position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(std::get<0>(tankMovement[7]), 0.025f, std::get<1>(tankMovement[7]))), glm::vec3(0.5f, 0.5f, 0.5f));
+	position = glm::rotate(position, std::get<2>(tankMovement[7]), glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
 
 	glActiveTexture(GL_TEXTURE2);
@@ -1305,8 +1327,9 @@ void RenderTank3() {
 
 	//drawing and scaling the object in the meant place
 	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 3);
-	position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(-9.0f, 0.025f, 4.0f)), glm::vec3(0.5f, 0.5f, 0.5f));
-	position = glm::rotate(position, glm::pi<float>() / 2, glm::vec3(0, 1, 0));
+	glUniform1f(glGetUniformLocation(ShapeProgramId, "selected"), currentTank == 8 ? 1.5 : 1.0);
+	position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(std::get<0>(tankMovement[8]), 0.025f, std::get<1>(tankMovement[8]))), glm::vec3(0.5f, 0.5f, 0.5f));
+	position = glm::rotate(position, std::get<2>(tankMovement[8]), glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
 
 	glActiveTexture(GL_TEXTURE3);
@@ -1569,22 +1592,30 @@ void processInput(GLFWwindow* window)
 
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
 		inainte += 0.01;
-	}//E for down
+	}
 
 	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
 		inainte -= 0.01;
-	}//E for down
+	}
 
 	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-		rotatie += 0.005;
-	}//E for down
+		std::get<2>(tankMovement[currentTank]) += 0.005;
+	}
 
 	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-		rotatie -= 0.005;
-	}//E for down
+		std::get<2>(tankMovement[currentTank]) -= 0.005;
+	}
 
-	tankX += inainte * glm::sin(rotatie);
-	tankZ += inainte * glm::cos(rotatie);
+	if (currentTank < 3) {
+		std::get<0>(tankMovement[currentTank]) += inainte * glm::sin(std::get<2>(tankMovement[currentTank]) - glm::pi<float>() / 2);
+		std::get<1>(tankMovement[currentTank]) += inainte * glm::cos(std::get<2>(tankMovement[currentTank]) - glm::pi<float>() / 2);
+	}
+	else {
+		std::get<0>(tankMovement[currentTank]) += inainte * glm::sin(std::get<2>(tankMovement[currentTank]));
+		std::get<1>(tankMovement[currentTank]) += inainte * glm::cos(std::get<2>(tankMovement[currentTank]));
+	}
+	//tankX += inainte * glm::sin(rotatie);
+	//tankZ += inainte * glm::cos(rotatie);
 
 }
 
@@ -1622,5 +1653,12 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			glUniform1f(glGetUniformLocation(ProgramId, "mixValue"), s_fMixValue);
 		}
 	}*/
+
+	if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS) {
+		currentTank++;
+		if (currentTank >= tankMovement.size()) {
+			currentTank %= tankMovement.size();
+		}
+	}
 
 }
