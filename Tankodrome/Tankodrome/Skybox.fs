@@ -4,9 +4,9 @@ out vec4 FragColor;
 in vec3 texCoords;
 
 uniform samplerCube skybox;
-uniform float cringe;
+uniform float darkeningFactor;
 
 void main()
 {    
-    FragColor = cringe*texture(skybox, texCoords);
+    FragColor = darkeningFactor*texture(skybox, texCoords);
 }

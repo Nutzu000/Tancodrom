@@ -242,7 +242,7 @@ unsigned int texture1Location, texture3Location, texture4Location, texture5Locat
 std::vector<GLuint> Tank1VAO, Tank1VBO, Tank2VAO, Tank2VBO, Tank3VAO, Tank3VBO, PlaneVAO, PlaneVBO;
 std::vector<size_t> Tank1VertexCounts, Tank2VertexCounts, Tank3VertexCounts, PlaneVertexCounts;
 unsigned int ShapeProgramId;
-float planePath = 0;
+float planePath = 0, darkeningFactor = 1;
 int currentTank = 0;
 std::vector<std::tuple<float, float, float>> tankMovement;
 
@@ -416,10 +416,10 @@ void CreateSunVBO()
 void CreateVBO()
 {
 	float square[] = {
-				 0.0f, 0.0f, 1.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f, //jos stanga
-				 1.0f, 0.0f, 1.0f,   1.0f, 1.0f, 1.0f,   1.0f, 0.0f, // jos dreapta
-				 0.0f, 0.0f, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 1.0f, //sus stanga
-				 1.0f, 0.0f, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f, //sus dreapta
+				 0.0f, 0.0f, 1.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f,   1.0f, 0.0f, 1.0f, //jos stanga
+				 1.0f, 0.0f, 1.0f,   1.0f, 1.0f, 1.0f,   1.0f, 0.0f,   1.0f, 0.0f, 1.0f,// jos dreapta
+				 0.0f, 0.0f, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 1.0f,   1.0f, 0.0f, 1.0f,//sus stanga
+				 1.0f, 0.0f, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f,   1.0f, 0.0f, 1.0f,//sus dreapta
 	};
 	unsigned int squareIndices[] = {
 	 0,1,2,
@@ -431,27 +431,24 @@ void CreateVBO()
 
 	glBindVertexArray(VAO);
 
-
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(square), square, GL_STATIC_DRAW);
-
-
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(squareIndices), squareIndices, GL_STATIC_DRAW);
 
 	// position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 	// color attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 	// texture coord attribute
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
-
-
-
+	//normal attribute
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(8 * sizeof(float)));
+	glEnableVertexAttribArray(3);
 
 }
 void DestroyVBO()
@@ -544,7 +541,7 @@ void CreateTextures(const std::string& strExePath)
 		std::cout << "Failed to load texture" << std::endl;
 	}
 	stbi_image_free(data);
-	
+
 	// texture 3
 	// ---------
 	glGenTextures(1, &texture3Location);
@@ -1420,9 +1417,9 @@ void RenderFunction()
 	//   glm::vec3(-1.0f,  0.0f,   1.0f),//jos stanga
 	//};
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glUseProgram(ProgramId);
+	//glUseProgram(ProgramId);
 
 	// bind textures on corresponding texture units
 	glActiveTexture(GL_TEXTURE0);
@@ -1430,12 +1427,12 @@ void RenderFunction()
 	/*glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, texture2Location);*/
 
-	glm::mat4 projection = pCamera->GetProjectionMatrix();
-	glUniformMatrix4fv(ProjMatrixLocation, 1, GL_FALSE, glm::value_ptr(projection));
+	//glm::mat4 projection = pCamera->GetProjectionMatrix();
+	//glUniformMatrix4fv(ProjMatrixLocation, 1, GL_FALSE, glm::value_ptr(projection));
 
-	//uncomment this to move camera with mouse
-	glm::mat4 view = pCamera->GetViewMatrix();
-	glUniformMatrix4fv(ViewMatrixLocation, 1, GL_FALSE, glm::value_ptr(view));
+	////uncomment this to move camera with mouse
+	//glm::mat4 view = pCamera->GetViewMatrix();
+	//glUniformMatrix4fv(ViewMatrixLocation, 1, GL_FALSE, glm::value_ptr(view));
 
 	//comment this to move camera with mouse
 	/*glm::mat4 view;
@@ -1485,8 +1482,7 @@ void drawSkybox(Shader skyboxShader) {
 
 	skyboxShader.Activate();
 	//lapse between day and night
-	glUniform1f(glGetUniformLocation(skyboxShader.ID, "cringe"), glm::sin(planePath) * glm::sin(planePath));
-	//glUniform1f(glGetUniformLocation(skyboxShader.ID, "cringe"), 1);
+	glUniform1f(glGetUniformLocation(skyboxShader.ID, "darkeningFactor"), darkeningFactor);
 	glm::mat4 view = glm::mat4(1.0f);
 	glm::mat4 projection = glm::mat4(1.0f);
 	// We make the mat4 into a mat3 and then a mat4 again in order to get rid of the last row and column
@@ -1569,10 +1565,12 @@ int main(int argc, char** argv)
 	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 2);
 
 	Shader lampShader("Lamp.vs", "Lamp.fs");
-	Shader lightingShader("PhongLight.vs", "PhongLight.fs");
 
 	Initialize(strExePath);
 	glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
+	glm::vec3 correction(0.0f, 0.0f, 20.0f);
+
+	float darkness = 0.001;
 
 	// render loop
 	while (!glfwWindowShouldClose(window)) {
@@ -1586,23 +1584,39 @@ int main(int argc, char** argv)
 		lightPos.x = 20 * glm::sin(0.1 * currentFrame);
 		lightPos.y = 20 * glm::cos(0.1 * currentFrame);
 
+		if (glm::sin(0.1*currentFrame) > 0.98 && darkness > 0) {
+
+			darkness = -0.001;
+			darkeningFactor -= 0.01;
+		}
+		if (glm::sin(0.1 * currentFrame) < -0.98 && darkness < 0) {
+
+			darkness = 0.001;
+			darkeningFactor += 0.01;
+
+		}
+		if (darkeningFactor > 0.2 && darkeningFactor < 1.0) {
+			darkeningFactor += darkness;
+		}
+
+
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		lightingShader.Activate();
-		lightingShader.SetVec3("objectColor", 0.5f, 1.0f, 0.31f);
-		lightingShader.SetVec3("lightColor", 1.0f, 0.0f, 0.0f);
-		lightingShader.SetVec3("lightPos", lightPos);
-		lightingShader.SetFloat("Ka", 0.5f);
-		lightingShader.SetFloat("Kd", 0.5f);
-		lightingShader.SetFloat("Ks", 0.5f);
-		lightingShader.SetFloat("Kspec", 1);
-		lightingShader.SetVec3("viewPos", pCamera->GetPosition());
-		lightingShader.SetMat4("projection", pCamera->GetProjectionMatrix());
-		lightingShader.SetMat4("view", pCamera->GetViewMatrix());
+		platformShader.Activate();
+		platformShader.SetVec3("objectColor", 1.0f, 1.0f, 1.0f);
+		platformShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
+		platformShader.SetVec3("lightPos", lightPos + correction);
+		platformShader.SetFloat("Ka", 0.25);
+		platformShader.SetFloat("Kd", 0.1);
+		platformShader.SetFloat("Ks", 0.1);
+		platformShader.SetFloat("Kspec", 1);
+		platformShader.SetVec3("viewPos", pCamera->GetPosition());
+		platformShader.SetMat4("ProjMatrix", pCamera->GetProjectionMatrix());
+		platformShader.SetMat4("ViewMatrix", pCamera->GetViewMatrix());
 
-		glm::mat4 model = glm::scale(glm::mat4(1.0), glm::vec3(3.0f));
-		lightingShader.SetMat4("model", model);
+		//glm::mat4 model = glm::scale(glm::mat4(1.0), glm::vec3(3.0f));
+		//lightingShader.SetMat4("model", model);
 
 		// render
 		RenderFunction();
@@ -1610,7 +1624,7 @@ int main(int argc, char** argv)
 		lampShader.Activate();
 		lampShader.SetMat4("projection", pCamera->GetProjectionMatrix());
 		lampShader.SetMat4("view", pCamera->GetViewMatrix());
-		model = glm::translate(glm::mat4(1.0), lightPos);
+		glm::mat4 model = glm::translate(glm::mat4(1.0), lightPos);
 		model = glm::translate(model, glm::vec3(1.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(1.0f));
 		lampShader.SetMat4("model", model);
@@ -1633,7 +1647,6 @@ int main(int argc, char** argv)
 	platformShader.Delete();
 	shapeShader.Delete();
 	lampShader.Delete();
-	lightingShader.Delete();
 	Cleanup();
 
 	// glfw: terminate, clearing all previously allocated GLFW resources

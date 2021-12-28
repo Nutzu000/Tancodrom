@@ -29,8 +29,6 @@
     <None Include="Model.vs" />
     <None Include="Lamp.fs" />
     <None Include="Lamp.vs" />
-    <None Include="PhongLight.fs" />
-    <None Include="PhongLight.vs" />
     <None Include="Platform.fs" />
     <None Include="Platform.vs" />
   </ItemGroup>
