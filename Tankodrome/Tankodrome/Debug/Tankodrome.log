@@ -1,43 +1,43 @@
 ﻿  Tankodrome.cpp
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(740,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(744,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(748,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(752,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(864,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(868,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(872,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(876,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(988,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(992,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(996,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1000,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1112,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1116,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1120,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1124,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1189,76): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(720,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(724,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(728,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(732,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(844,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(848,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(852,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(856,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(968,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(972,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(976,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(980,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1092,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1096,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1100,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1104,51): warning C4244: 'argument': conversion from 'float' to 'GLsizei', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1169,76): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1190,76): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
 C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1210,76): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1230,76): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1264,76): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1244,76): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1266,76): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
 C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1286,76): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1306,76): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1319,76): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
 C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1339,76): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
 C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1359,76): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1379,76): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1599,20): warning C4305: '+=': truncation from 'double' to 'float'
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1606,19): warning C4244: '=': conversion from 'double' to 'T', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1579,20): warning C4305: '+=': truncation from 'double' to 'float'
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1586,19): warning C4244: '=': conversion from 'double' to 'T', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1607,19): warning C4244: '=': conversion from 'double' to 'T', possible loss of data
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1587,19): warning C4244: '=': conversion from 'double' to 'T', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1692,18): warning C4305: '+=': truncation from 'double' to 'float'
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1696,18): warning C4305: '-=': truncation from 'double' to 'float'
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1700,50): warning C4305: '+=': truncation from 'double' to 'float'
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1704,50): warning C4305: '-=': truncation from 'double' to 'float'
-C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1757,19): warning C4018: '>=': signed/unsigned mismatch
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1672,18): warning C4305: '+=': truncation from 'double' to 'float'
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1676,18): warning C4305: '-=': truncation from 'double' to 'float'
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1680,50): warning C4305: '+=': truncation from 'double' to 'float'
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1684,50): warning C4305: '-=': truncation from 'double' to 'float'
+C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Tankodrome\Tankodrome.cpp(1737,19): warning C4018: '>=': signed/unsigned mismatch
   Tankodrome.vcxproj -> C:\Users\gliza\Desktop\Tankodrome2\Tankodrome\Debug\Tankodrome.exe

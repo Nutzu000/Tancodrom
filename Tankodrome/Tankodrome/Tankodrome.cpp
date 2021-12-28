@@ -24,10 +24,6 @@
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
-GLuint cubemapTexture;
-float planePath = 0, rotatie = 0, tankX = -3.0f, tankZ = -2.0f, tank1X = 0, tank1Z = 0;
-int currentTank = 0;
-std::vector<std::tuple<float, float, float>> tankMovement;
 enum ECameraMovementType
 {
 	UNKNOWN,
@@ -240,15 +236,20 @@ protected:
 GLuint VAO, VBO, EBO;
 unsigned int ProgramId;
 GLuint ProjMatrixLocation, ViewMatrixLocation, WorldMatrixLocation;
-unsigned int texture1Location, texture2Location, texture3Location, texture4Location, texture5Location;
+unsigned int texture1Location, texture3Location, texture4Location, texture5Location;
 
+//imports
 std::vector<GLuint> Tank1VAO, Tank1VBO, Tank2VAO, Tank2VBO, Tank3VAO, Tank3VBO, PlaneVAO, PlaneVBO;
 std::vector<size_t> Tank1VertexCounts, Tank2VertexCounts, Tank3VertexCounts, PlaneVertexCounts;
 unsigned int ShapeProgramId;
+float planePath = 0;
+int currentTank = 0;
+std::vector<std::tuple<float, float, float>> tankMovement;
 
-//initializari skybox
+//skybox
 unsigned int skyboxVAO, skyboxVBO, skyboxEBO;
 unsigned int sunVAO, sunVBO;
+GLuint cubemapTexture;
 
 Camera* pCamera = nullptr;
 
@@ -502,9 +503,7 @@ void CreateShaders()
 	WorldMatrixLocation = glGetUniformLocation(ProgramId, "WorldMatrix");
 
 	glUniform1i(glGetUniformLocation(ProgramId, "texture1"), 0);
-	glUniform1i(glGetUniformLocation(ProgramId, "texture2"), 1);
 
-	glUniform1f(glGetUniformLocation(ProgramId, "mixValue"), 0.5);
 }
 void DestroyShaders()
 {
@@ -545,27 +544,7 @@ void CreateTextures(const std::string& strExePath)
 		std::cout << "Failed to load texture" << std::endl;
 	}
 	stbi_image_free(data);
-	// texture 2
-	// ---------
-	glGenTextures(1, &texture2Location);
-	glBindTexture(GL_TEXTURE_2D, texture2Location);
-	// set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// load image, create texture and generate mipmaps
-	data = stbi_load((strExePath + "\\Bricks.jpg").c_str(), &width, &height, &nrChannels, 0);
-	if (data) {
-		// note that the awesomeface.png has transparency and thus an alpha channel, so make sure to tell OpenGL the data type is of GL_RGBA
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else {
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	stbi_image_free(data);
+	
 	// texture 3
 	// ---------
 	glGenTextures(1, &texture3Location);
@@ -608,7 +587,8 @@ void CreateTextures(const std::string& strExePath)
 		std::cout << "Failed to load texture" << std::endl;
 	}
 	stbi_image_free(data);
-	// texture 4
+
+	// texture 5
 	// ---------
 	glGenTextures(1, &texture5Location);
 	glBindTexture(GL_TEXTURE_2D, texture5Location);
@@ -1185,14 +1165,14 @@ void RenderTank1() {
 	//glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, glm::value_ptr(worldTransf));
 
 	//drawing and scaling the object in the meant place
-	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 2);
+	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 1);
 	glUniform1f(glGetUniformLocation(ShapeProgramId, "selected"), currentTank == 0 ? 1.5 : 1.0);
 	glm::mat4 position = glm::translate(glm::mat4(1.0), glm::vec3(std::get<0>(tankMovement[0]), 0.08, std::get<1>(tankMovement[0])));
 	position = glm::scale(position, glm::vec3(0.01f, 0.01f, 0.01f));
 	position = glm::rotate(position, std::get<2>(tankMovement[0]), glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
 
-	glActiveTexture(GL_TEXTURE2);
+	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, texture3Location);
 
 	for (size_t s = 0; s < Tank1VAO.size(); s++) {
@@ -1206,13 +1186,13 @@ void RenderTank1() {
 	}
 
 	//drawing the same obj again
-	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 3);
+	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 2);
 	glUniform1f(glGetUniformLocation(ShapeProgramId, "selected"), currentTank == 1 ? 1.5 : 1.0);
 	position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(std::get<0>(tankMovement[1]), 0.08f, std::get<1>(tankMovement[1]))), glm::vec3(0.01f, 0.01f, 0.01f));
 	position = glm::rotate(position, std::get<2>(tankMovement[1]), glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
 
-	glActiveTexture(GL_TEXTURE3);
+	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, texture4Location);
 
 	for (size_t s = 0; s < Tank1VAO.size(); s++) {
@@ -1226,13 +1206,13 @@ void RenderTank1() {
 	}
 
 	//and again
-	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 4);
+	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 3);
 	glUniform1f(glGetUniformLocation(ShapeProgramId, "selected"), currentTank == 2 ? 1.5 : 1.0);
 	position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(std::get<0>(tankMovement[2]), 0.08f, std::get<1>(tankMovement[2]))), glm::vec3(0.01f, 0.01f, 0.01f));
 	position = glm::rotate(position, std::get<2>(tankMovement[2]), glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
 
-	glActiveTexture(GL_TEXTURE4);
+	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, texture5Location);
 
 	for (size_t s = 0; s < Tank1VAO.size(); s++) {
@@ -1260,14 +1240,14 @@ void RenderTank2() {
 	//glm::vec3(-3.0f+inainte * glm::sin(rotatie), 0.4f, -2.0f+inainte * glm::cos(rotatie))
 	//drawing and scaling the object in the meant place
 	//glm::vec3(-3.0f + tankX, 0.4f, -2.0f + inainte)
-	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 4);
+	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 3);
 	glUniform1f(glGetUniformLocation(ShapeProgramId, "selected"), currentTank == 3 ? 1.5 : 1.0);
 	glm::mat4 position = glm::translate(glm::mat4(1.0), glm::vec3(std::get<0>(tankMovement[3]), 0.4f, std::get<1>(tankMovement[3])));
 	position = glm::scale(position, glm::vec3(0.035f, 0.035f, 0.035f));
 	position = glm::rotate(position, std::get<2>(tankMovement[3]), glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
 
-	glActiveTexture(GL_TEXTURE4);
+	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, texture5Location);
 
 	for (size_t s = 0; s < Tank2VAO.size(); s++) {
@@ -1282,13 +1262,13 @@ void RenderTank2() {
 
 	//drawing and scaling the object in the meant place
 	//glm::vec3(-3.0f+inainte * glm::sin(rotatie), 0.4f, -2.0f+inainte * glm::cos(rotatie))
-	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 2);
+	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 1);
 	glUniform1f(glGetUniformLocation(ShapeProgramId, "selected"), currentTank == 4 ? 1.5 : 1.0);
 	position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(std::get<0>(tankMovement[4]), 0.4f, std::get<1>(tankMovement[4]))), glm::vec3(0.035f, 0.035f, 0.035f));
 	position = glm::rotate(position, std::get<2>(tankMovement[4]), glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
 
-	glActiveTexture(GL_TEXTURE2);
+	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, texture3Location);
 
 	for (size_t s = 0; s < Tank2VAO.size(); s++) {
@@ -1302,13 +1282,13 @@ void RenderTank2() {
 	}
 
 	//drawing and scaling the object in the meant place
-	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 3);
+	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 2);
 	glUniform1f(glGetUniformLocation(ShapeProgramId, "selected"), currentTank == 5 ? 1.5 : 1.0);
 	position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(std::get<0>(tankMovement[5]), 0.4f, std::get<1>(tankMovement[5]))), glm::vec3(0.035f, 0.035f, 0.035f));
 	position = glm::rotate(position, std::get<2>(tankMovement[5]), glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
 
-	glActiveTexture(GL_TEXTURE3);
+	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, texture4Location);
 
 	for (size_t s = 0; s < Tank2VAO.size(); s++) {
@@ -1335,13 +1315,13 @@ void RenderTank3() {
 	glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(view));*/
 
 	//drawing and scaling the object in the meant place
-	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 4);
+	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 3);
 	glUniform1f(glGetUniformLocation(ShapeProgramId, "selected"), currentTank == 6 ? 1.5 : 1.0);
 	glm::mat4 position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(std::get<0>(tankMovement[6]), 0.025f, std::get<1>(tankMovement[6]))), glm::vec3(0.5f, 0.5f, 0.5f));
 	position = glm::rotate(position, std::get<2>(tankMovement[6]), glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
 
-	glActiveTexture(GL_TEXTURE4);
+	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, texture5Location);
 
 	for (size_t s = 0; s < Tank3VAO.size(); s++) {
@@ -1355,13 +1335,13 @@ void RenderTank3() {
 	}
 
 	//drawing and scaling the object in the meant place
-	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 2);
+	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 1);
 	glUniform1f(glGetUniformLocation(ShapeProgramId, "selected"), currentTank == 7 ? 1.5 : 1.0);
 	position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(std::get<0>(tankMovement[7]), 0.025f, std::get<1>(tankMovement[7]))), glm::vec3(0.5f, 0.5f, 0.5f));
 	position = glm::rotate(position, std::get<2>(tankMovement[7]), glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
 
-	glActiveTexture(GL_TEXTURE2);
+	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, texture3Location);
 
 	for (size_t s = 0; s < Tank3VAO.size(); s++) {
@@ -1375,13 +1355,13 @@ void RenderTank3() {
 	}
 
 	//drawing and scaling the object in the meant place
-	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 3);
+	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 2);
 	glUniform1f(glGetUniformLocation(ShapeProgramId, "selected"), currentTank == 8 ? 1.5 : 1.0);
 	position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(std::get<0>(tankMovement[8]), 0.025f, std::get<1>(tankMovement[8]))), glm::vec3(0.5f, 0.5f, 0.5f));
 	position = glm::rotate(position, std::get<2>(tankMovement[8]), glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
 
-	glActiveTexture(GL_TEXTURE3);
+	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, texture4Location);
 
 	for (size_t s = 0; s < Tank3VAO.size(); s++) {
@@ -1408,12 +1388,12 @@ void RenderPlane() {
 	glUniformMatrix4fv(viewMatrixLocation, 1, GL_FALSE, glm::value_ptr(view));*/
 
 	//drawing and scaling the object in the meant place
-	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 4);
+	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 3);
 	glm::mat4 position = glm::scale(glm::translate(glm::mat4(1.0), glm::vec3(10 * glm::sin(planePath), 5.00f, 10 * glm::cos(planePath))), glm::vec3(0.25f, 0.25f, 0.25f));
 	position = glm::rotate(position, planePath + glm::pi<float>() / 2, glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(worldMatrixLocation, 1, GL_FALSE, &position[0][0]);
 
-	glActiveTexture(GL_TEXTURE4);
+	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, texture5Location);
 
 	for (size_t s = 0; s < PlaneVAO.size(); s++) {
@@ -1447,8 +1427,8 @@ void RenderFunction()
 	// bind textures on corresponding texture units
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture1Location);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, texture2Location);
+	/*glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, texture2Location);*/
 
 	glm::mat4 projection = pCamera->GetProjectionMatrix();
 	glUniformMatrix4fv(ProjMatrixLocation, 1, GL_FALSE, glm::value_ptr(projection));
