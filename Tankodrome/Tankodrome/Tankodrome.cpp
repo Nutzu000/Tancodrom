@@ -172,6 +172,11 @@ public:
 			FoVy = 90.0f;
 	}
 
+	const glm::vec3 GetPosition() const
+	{
+		return position;
+	}
+
 private:
 	void ProcessMouseMovement(float xOffset, float yOffset, bool constrainPitch = true)
 	{
@@ -205,6 +210,7 @@ private:
 		up = glm::normalize(glm::cross(right, forward));
 	}
 
+
 protected:
 	const float cameraSpeedFactor = 2.5f;
 	const float mouseSensitivity = 0.1f;
@@ -232,7 +238,7 @@ protected:
 };
 
 GLuint VAO, VBO, EBO;
-unsigned int VertexShaderId, FragmentShaderId, ProgramId;
+unsigned int ProgramId;
 GLuint ProjMatrixLocation, ViewMatrixLocation, WorldMatrixLocation;
 unsigned int texture1Location, texture2Location, texture3Location, texture4Location, texture5Location;
 
@@ -245,42 +251,6 @@ unsigned int skyboxVAO, skyboxVBO, skyboxEBO;
 unsigned int sunVAO, sunVBO;
 
 Camera* pCamera = nullptr;
-
-// Shader-ul de varfuri / Vertex shader (este privit ca un sir de caractere)
-const GLchar* VertexShader =
-{
-   "#version 330\n"\
-   "layout (location = 0) in vec3 aPos;\n"\
-   "layout (location = 1) in vec3 aColor;\n"\
-   "layout (location = 2) in vec2 aTexCoord;\n"\
-   "out vec3 ourColor;\n"\
-   "out vec2 TexCoord;\n"\
-   "uniform mat4 ProjMatrix;\n"\
-   "uniform mat4 ViewMatrix;\n"\
-   "uniform mat4 WorldMatrix;\n"\
-   "void main()\n"\
-   "{\n"\
-   "gl_Position = ProjMatrix * ViewMatrix * WorldMatrix * vec4(aPos, 1.0);\n"\
-   "ourColor = aColor;\n"\
-   "TexCoord = vec2(aTexCoord.x, aTexCoord.y);\n"\
-   "}\n"
-};
-// Shader-ul de fragment / Fragment shader (este privit ca un sir de caractere)
-
-const GLchar* FragmentShader =
-{
-   "#version 330\n"\
-   "out vec4 FragColor;\n"\
-   "in vec3 ourColor;\n"\
-   "in vec2 TexCoord;\n"\
-   "uniform float mixValue;\n"\
-   "uniform sampler2D texture1;\n"\
-   "uniform sampler2D texture2;\n"\
-   "void main()\n"\
-   "{\n"\
-   "  FragColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), mixValue)*vec4(ourColor,1.0); \n"\
-   "}\n"
-};
 
 void CreateSkyboxVBO(const std::string& strExePath) {
 
@@ -494,7 +464,7 @@ void DestroyVBO()
 }
 void CreateShaders()
 {
-	VertexShaderId = glCreateShader(GL_VERTEX_SHADER);
+	/*VertexShaderId = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(VertexShaderId, 1, &VertexShader, NULL);
 	glCompileShader(VertexShaderId);
 
@@ -524,7 +494,7 @@ void CreateShaders()
 		fprintf(stderr, "Invalid shader program: '%s'\n", ErrorLog);
 		exit(1);
 	}
-
+	*/
 	glUseProgram(ProgramId);
 
 	ProjMatrixLocation = glGetUniformLocation(ProgramId, "ProjMatrix");
@@ -540,13 +510,13 @@ void DestroyShaders()
 {
 	glUseProgram(0);
 
-	glDetachShader(ProgramId, VertexShaderId);
-	glDetachShader(ProgramId, FragmentShaderId);
+	//glDetachShader(ProgramId, VertexShaderId);
+	//glDetachShader(ProgramId, FragmentShaderId);
 
-	glDeleteShader(FragmentShaderId);
-	glDeleteShader(VertexShaderId);
+	//glDeleteShader(FragmentShaderId);
+	//glDeleteShader(VertexShaderId);
 
-	glDeleteProgram(ProgramId);
+	//glDeleteProgram(ProgramId);
 }
 
 void CreateTextures(const std::string& strExePath)
@@ -1609,15 +1579,20 @@ int main(int argc, char** argv)
 	skyboxShader.Activate();
 	glUniform1i(glGetUniformLocation(skyboxShader.ID, "skybox"), 0);
 
+	Shader platformShader("Platform.vs", "Platform.fs");
+	platformShader.Activate();
+	ProgramId = platformShader.ID;
+
 	Shader shapeShader("Model.vs", "Model.fs");
 	shapeShader.Activate();
 	ShapeProgramId = shapeShader.ID;
 	glUniform1i(glGetUniformLocation(ShapeProgramId, "texture1"), 2);
 
 	Shader lampShader("Lamp.vs", "Lamp.fs");
-
+	Shader lightingShader("PhongLight.vs", "PhongLight.fs");
 
 	Initialize(strExePath);
+	glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
 
 	// render loop
 	while (!glfwWindowShouldClose(window)) {
@@ -1626,21 +1601,46 @@ int main(int argc, char** argv)
 		double currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
+
+		//light related stuff
+		lightPos.x = 20 * glm::sin(0.1 * currentFrame);
+		lightPos.y = 20 * glm::cos(0.1 * currentFrame);
+
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		lightingShader.Activate();
+		lightingShader.SetVec3("objectColor", 0.5f, 1.0f, 0.31f);
+		lightingShader.SetVec3("lightColor", 1.0f, 0.0f, 0.0f);
+		lightingShader.SetVec3("lightPos", lightPos);
+		lightingShader.SetFloat("Ka", 0.5f);
+		lightingShader.SetFloat("Kd", 0.5f);
+		lightingShader.SetFloat("Ks", 0.5f);
+		lightingShader.SetFloat("Kspec", 1);
+		lightingShader.SetVec3("viewPos", pCamera->GetPosition());
+		lightingShader.SetMat4("projection", pCamera->GetProjectionMatrix());
+		lightingShader.SetMat4("view", pCamera->GetViewMatrix());
+
+		glm::mat4 model = glm::scale(glm::mat4(1.0), glm::vec3(3.0f));
+		lightingShader.SetMat4("model", model);
+
 		// render
 		RenderFunction();
-		drawSkybox(skyboxShader);
 
 		lampShader.Activate();
 		lampShader.SetMat4("projection", pCamera->GetProjectionMatrix());
 		lampShader.SetMat4("view", pCamera->GetViewMatrix());
-		glm::mat4 model;
-		model = glm::translate(glm::mat4(1.0), glm::vec3(60 * glm::sin(0.1 * currentFrame), 60 * glm::cos(0.1 * currentFrame), 0.0f));
+		model = glm::translate(glm::mat4(1.0), lightPos);
 		model = glm::translate(model, glm::vec3(1.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(1.0f));
 		lampShader.SetMat4("model", model);
 
 		glBindVertexArray(sunVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, sunVBO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		drawSkybox(skyboxShader);
+
 		// input
 		processInput(window);
 
@@ -1650,6 +1650,10 @@ int main(int argc, char** argv)
 		glfwPollEvents();
 	}
 	skyboxShader.Delete();
+	platformShader.Delete();
+	shapeShader.Delete();
+	lampShader.Delete();
+	lightingShader.Delete();
 	Cleanup();
 
 	// glfw: terminate, clearing all previously allocated GLFW resources

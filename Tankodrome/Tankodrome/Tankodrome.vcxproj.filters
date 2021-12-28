@@ -27,8 +27,12 @@
     <None Include="Skybox.fs" />
     <None Include="Model.fs" />
     <None Include="Model.vs" />
-    <None Include="..\Debug\Lamp.vs" />
-    <None Include="..\Debug\Lamp.fs" />
+    <None Include="Lamp.fs" />
+    <None Include="Lamp.vs" />
+    <None Include="PhongLight.fs" />
+    <None Include="PhongLight.vs" />
+    <None Include="Platform.fs" />
+    <None Include="Platform.vs" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
